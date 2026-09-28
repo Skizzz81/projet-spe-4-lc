@@ -17,6 +17,7 @@ export function App() {
       title,
       content: '',
       updatedAt: "À l'instant",
+      lastModifiedBy: 'Vous',
       access: 'Propriétaire',
     };
 
@@ -27,7 +28,14 @@ export function App() {
   function updateDocumentContent(documentId, content) {
     setDocuments((currentDocuments) =>
       currentDocuments.map((document) =>
-        document.id === documentId ? { ...document, content } : document,
+        document.id === documentId
+          ? {
+              ...document,
+              content,
+              updatedAt: "À l'instant",
+              lastModifiedBy: 'Vous',
+            }
+          : document,
       ),
     );
   }

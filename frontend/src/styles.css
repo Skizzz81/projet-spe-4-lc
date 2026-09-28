@@ -368,6 +368,13 @@ button {
   white-space: nowrap;
 }
 
+.document-access {
+  width: fit-content;
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 .document-page {
   width: min(100% - 2rem, 70rem);
   margin: 0 auto;

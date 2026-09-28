@@ -24,11 +24,15 @@ export function DocumentCard({ document }) {
 
       <span className="document-information">
         <span className="document-title">{document.title}</span>
-        <span className="document-metadata">
+        <span
+          className="document-metadata"
+          title={`Modifié ${document.updatedAt} par ${document.lastModifiedBy}`}
+        >
           <span>{document.updatedAt}</span>
           <span aria-hidden="true">•</span>
-          <span>{document.access}</span>
+          <span>par {document.lastModifiedBy}</span>
         </span>
+        <span className="document-access">{document.access}</span>
       </span>
     </Link>
   );
