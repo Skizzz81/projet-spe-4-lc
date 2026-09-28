@@ -1,0 +1,30 @@
+{
+  "name": "projet-spe-4",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "frontend",
+    "api",
+    "realtime"
+  ],
+  "scripts": {
+    "dev": "concurrently -n frontend,api,realtime -c cyan,green,magenta \"npm run dev --workspace frontend\" \"npm run dev --workspace api\" \"npm run dev --workspace realtime\"",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:api": "npm run dev --workspace api",
+    "dev:realtime": "npm run dev --workspace realtime",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.5",
+    "eslint": "^10.11.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9"
+  }
+}
