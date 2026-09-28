@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar.jsx';
 import { Header } from './components/layout/Header.jsx';
 import { CreateDocumentModal } from './components/documents/CreateDocumentModal.jsx';
@@ -8,8 +8,11 @@ import { DocumentPage } from './pages/DocumentPage.jsx';
 import { documents as initialDocuments } from './mocks/documents.js';
 
 export function App() {
+  const navigate = useNavigate();
   const [documents, setDocuments] = useState(initialDocuments);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const ownedDocuments = documents.filter((document) => document.access === 'Propriétaire');
+  const sharedDocuments = documents.filter((document) => document.access === 'Partagé');
 
   function createDocument(title) {
     const newDocument = {
@@ -23,6 +26,7 @@ export function App() {
 
     setDocuments((currentDocuments) => [newDocument, ...currentDocuments]);
     setIsCreateModalOpen(false);
+    navigate('/');
   }
 
   function updateDocumentContent(documentId, content) {
@@ -57,7 +61,30 @@ export function App() {
 
               <div className="workspace">
                 <Header />
-                <DashboardPage documents={documents} />
+                <DashboardPage
+                  documents={ownedDocuments}
+                  title="Mes documents"
+                  description="Retrouve ici les documents dont tu es propriétaire."
+                  sectionTitle="Tous les documents"
+                />
+              </div>
+            </div>
+          }
+        />
+        <Route
+          path="/shared"
+          element={
+            <div className="app-shell">
+              <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+
+              <div className="workspace">
+                <Header />
+                <DashboardPage
+                  documents={sharedDocuments}
+                  title="Partagés avec moi"
+                  description="Retrouve ici les documents sur lesquels tu as été invité."
+                  sectionTitle="Documents partagés"
+                />
               </div>
             </div>
           }

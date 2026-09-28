@@ -1,14 +1,12 @@
 import { DocumentCard } from '../components/documents/DocumentCard.jsx';
 
-export function DashboardPage({ documents }) {
+export function DashboardPage({ documents, title, description, sectionTitle }) {
   return (
     <main className="main-content">
       <div className="page-heading">
         <div>
-          <h1>Mes documents</h1>
-          <p className="page-description">
-            Retrouve ici les documents que tu as créés ou modifiés récemment.
-          </p>
+          <h1>{title}</h1>
+          <p className="page-description">{description}</p>
         </div>
 
         <span className="document-count">
@@ -17,7 +15,7 @@ export function DashboardPage({ documents }) {
       </div>
 
       <section className="documents-section" aria-labelledby="documents-title">
-        <h2 id="documents-title">Tous les documents</h2>
+        <h2 id="documents-title">{sectionTitle}</h2>
 
         <div className="documents-grid">
           {documents.map((document) => (

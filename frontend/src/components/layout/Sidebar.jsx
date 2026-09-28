@@ -1,6 +1,8 @@
+import { NavLink } from 'react-router-dom';
+
 const navigationItems = [
-  { label: 'Mes documents', symbol: '▤', active: true },
-  { label: 'Partagés avec moi', symbol: '♧' },
+  { label: 'Mes documents', symbol: '▤', to: '/' },
+  { label: 'Partagés avec moi', symbol: '♧', to: '/shared' },
 ];
 
 export function Sidebar({ onCreateDocument }) {
@@ -24,16 +26,19 @@ export function Sidebar({ onCreateDocument }) {
 
       <nav className="sidebar-navigation" aria-label="Navigation principale">
         {navigationItems.map((item) => (
-          <button
-            className={`navigation-item${item.active ? ' active' : ''}`}
-            type="button"
+          <NavLink
+            className={({ isActive }) =>
+              `navigation-item${isActive ? ' active' : ''}`
+            }
+            end={item.to === '/'}
             key={item.label}
+            to={item.to}
           >
             <span className="navigation-symbol" aria-hidden="true">
               {item.symbol}
             </span>
             {item.label}
-          </button>
+          </NavLink>
         ))}
       </nav>
     </aside>
