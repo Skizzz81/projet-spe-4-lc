@@ -42,7 +42,7 @@ docker compose up --build
 Les services sont disponibles aux adresses suivantes :
 
 - frontend : http://localhost:5173
-- API REST : http://localhost:3000/health
+- API REST et connexion MySQL : http://localhost:3000/health
 - serveur temps réel : http://localhost:3001/health
 - MySQL depuis la machine : `localhost:3307`
 
@@ -56,4 +56,4 @@ docker compose down
 
 Les données MySQL restent dans le volume Docker `mysql_data`. La commande `docker compose down -v` supprime aussi ce volume et toutes ses données.
 
-À ce stade, les variables de connexion MySQL sont transmises à l'API, mais le code de connexion à la base n'est pas encore implémenté.
+L'API utilise un pool de connexions `mysql2`. Sa route `/health` exécute une requête simple pour vérifier que MySQL est réellement disponible.
