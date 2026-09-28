@@ -1,10 +1,24 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import { checkDatabaseConnection, database } from './config/database.js';
+import errorHandler from './middlewares/errorHandler.js';
+import authRoutes from './routes/authRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 const port = Number(process.env.PORT ?? 3000);
 
+
 app.use(express.json());
+app.use(cookieParser());
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true
+}));
+
+app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get('/health', async (_request, response) => {
   try {
@@ -18,6 +32,8 @@ app.get('/health', async (_request, response) => {
     });
   }
 });
+
+app.use(errorHandler);
 
 async function startServer() {
   try {
