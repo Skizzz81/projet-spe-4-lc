@@ -9,7 +9,147 @@ body {
 }
 
 main {
-  max-width: 48rem;
-  margin: 4rem auto;
+  max-width: 60rem;
+  margin: 2rem auto;
   padding: 0 1.5rem;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  background: #2563eb;
+  color: white;
+  font-size: 0.9rem;
+}
+
+button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+input {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.4rem;
+  font-size: 0.95rem;
+}
+
+/* --- Login --- */
+.login form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* --- Salle --- */
+.entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.moi-badge {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.colonnes {
+  display: grid;
+  grid-template-columns: 14rem 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.participants {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+  padding: 1rem;
+}
+
+.participants ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.participants li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+}
+
+.participants .vide {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+/* --- Chat --- */
+.chat {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.6rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 26rem;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem 0;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.6rem;
+}
+
+.message.moi {
+  align-self: flex-end;
+  background: #dbeafe;
+}
+
+.message .auteur {
+  font-size: 0.72rem;
+  color: #6b7280;
+}
+
+.barre-message {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.barre-message input {
+  flex: 1;
+}
+
+/* --- Barre d'appel --- */
+.barre-appel {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111827;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 2rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
