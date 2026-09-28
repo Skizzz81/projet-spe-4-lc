@@ -1,9 +1,23 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentEditor } from '../components/editor/DocumentEditor.jsx';
 
-export function DocumentPage({ documents, onContentChange }) {
+export function DocumentPage({ documents, onContentChange, onDelete }) {
   const { documentId } = useParams();
+  const navigate = useNavigate();
   const document = documents.find((item) => String(item.id) === documentId);
+
+  function handleDelete() {
+    const isConfirmed = window.confirm(
+      `Voulez-vous vraiment supprimer « ${document.title} » ?`,
+    );
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    onDelete(document.id);
+    navigate('/');
+  }
 
   if (!document) {
     return (
@@ -27,8 +41,14 @@ export function DocumentPage({ documents, onContentChange }) {
       </Link>
 
       <header className="document-page-header">
-        <p className="document-page-label">Document</p>
-        <h1>{document.title}</h1>
+        <div>
+          <p className="document-page-label">Document</p>
+          <h1>{document.title}</h1>
+        </div>
+
+        <button className="danger-button" type="button" onClick={handleDelete}>
+          Supprimer
+        </button>
       </header>
 
       <DocumentEditor

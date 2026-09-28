@@ -32,6 +32,12 @@ export function App() {
     );
   }
 
+  function deleteDocument(documentId) {
+    setDocuments((currentDocuments) =>
+      currentDocuments.filter((document) => document.id !== documentId),
+    );
+  }
+
   return (
     <>
       <Routes>
@@ -51,7 +57,11 @@ export function App() {
         <Route
           path="/documents/:documentId"
           element={
-            <DocumentPage documents={documents} onContentChange={updateDocumentContent} />
+            <DocumentPage
+              documents={documents}
+              onContentChange={updateDocumentContent}
+              onDelete={deleteDocument}
+            />
           }
         />
       </Routes>
