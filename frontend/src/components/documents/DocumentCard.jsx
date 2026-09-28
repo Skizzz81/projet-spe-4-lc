@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 function DocumentIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -10,7 +12,7 @@ function DocumentIcon() {
 
 export function DocumentCard({ document }) {
   return (
-    <button className="document-card" type="button">
+    <Link className="document-card" to={`/documents/${document.id}`}>
       <span className="document-preview" aria-hidden="true">
         <span className="document-preview-icon">
           <DocumentIcon />
@@ -28,6 +30,6 @@ export function DocumentCard({ document }) {
           <span>{document.access}</span>
         </span>
       </span>
-    </button>
+    </Link>
   );
 }

@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar.jsx';
 import { Header } from './components/layout/Header.jsx';
 import { CreateDocumentModal } from './components/documents/CreateDocumentModal.jsx';
 import { DashboardPage } from './pages/DashboardPage.jsx';
+import { DocumentPage } from './pages/DocumentPage.jsx';
 import { documents as initialDocuments } from './mocks/documents.js';
 
 export function App() {
@@ -13,6 +15,7 @@ export function App() {
     const newDocument = {
       id: crypto.randomUUID(),
       title,
+      content: '',
       updatedAt: "À l'instant",
       access: 'Propriétaire',
     };
@@ -21,14 +24,37 @@ export function App() {
     setIsCreateModalOpen(false);
   }
 
-  return (
-    <div className="app-shell">
-      <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+  function updateDocumentContent(documentId, content) {
+    setDocuments((currentDocuments) =>
+      currentDocuments.map((document) =>
+        document.id === documentId ? { ...document, content } : document,
+      ),
+    );
+  }
 
-      <div className="workspace">
-        <Header />
-        <DashboardPage documents={documents} />
-      </div>
+  return (
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <div className="app-shell">
+              <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+
+              <div className="workspace">
+                <Header />
+                <DashboardPage documents={documents} />
+              </div>
+            </div>
+          }
+        />
+        <Route
+          path="/documents/:documentId"
+          element={
+            <DocumentPage documents={documents} onContentChange={updateDocumentContent} />
+          }
+        />
+      </Routes>
 
       {isCreateModalOpen && (
         <CreateDocumentModal
@@ -36,6 +62,6 @@ export function App() {
           onCreate={createDocument}
         />
       )}
-    </div>
+    </>
   );
 }
