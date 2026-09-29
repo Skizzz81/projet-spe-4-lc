@@ -1,4 +1,6 @@
 const errorHandler = (error, req, res, next) => {
+    void req;
+    void next;
 
     console.error(error);
 

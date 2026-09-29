@@ -11,6 +11,16 @@ function DocumentIcon() {
 }
 
 export function DocumentCard({ document }) {
+  const updatedAt = new Intl.DateTimeFormat('fr-FR', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(document.updatedAt));
+  const accessLabels = {
+    owner: 'Propriétaire',
+    editor: 'Éditeur',
+    viewer: 'Lecture seule',
+  };
+
   return (
     <Link className="document-card" to={`/documents/${document.id}`}>
       <span className="document-preview" aria-hidden="true">
@@ -26,13 +36,13 @@ export function DocumentCard({ document }) {
         <span className="document-title">{document.title}</span>
         <span
           className="document-metadata"
-          title={`Modifié ${document.updatedAt} par ${document.lastModifiedBy}`}
+          title={`Modifié ${updatedAt} par ${document.lastModifiedBy}`}
         >
-          <span>{document.updatedAt}</span>
+          <span>{updatedAt}</span>
           <span aria-hidden="true">•</span>
           <span>par {document.lastModifiedBy}</span>
         </span>
-        <span className="document-access">{document.access}</span>
+        <span className="document-access">{accessLabels[document.access]}</span>
       </span>
     </Link>
   );

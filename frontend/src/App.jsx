@@ -6,8 +6,8 @@ import { Header } from './components/layout/Header.jsx';
 import { Sidebar } from './components/layout/Sidebar.jsx';
 import { TwoFactorSetup } from './components/TwoFactorSetup.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { useDocuments } from './hooks/useDocuments.js';
 import { socket } from './lib/socket.js';
-import { documents as initialDocuments } from './mocks/documents.js';
 import { DashboardPage } from './pages/DashboardPage.jsx';
 import { DocumentPage } from './pages/DocumentPage.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
@@ -88,45 +88,15 @@ function RealtimeRoomPage() {
 
 function WorkspaceApp() {
   const navigate = useNavigate();
-  const [documents, setDocuments] = useState(initialDocuments);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const ownedDocuments = documents.filter((document) => document.access === 'Propriétaire');
-  const sharedDocuments = documents.filter((document) => document.access === 'Partagé');
+  const { documents, createDocument, updateDocumentContent, deleteDocument } = useDocuments();
+  const ownedDocuments = documents.filter((document) => document.access === 'owner');
+  const sharedDocuments = documents.filter((document) => document.access !== 'owner');
 
-  function createDocument(title) {
-    const newDocument = {
-      id: crypto.randomUUID(),
-      title,
-      content: '',
-      updatedAt: "À l'instant",
-      lastModifiedBy: 'Vous',
-      access: 'Propriétaire',
-    };
-
-    setDocuments((currentDocuments) => [newDocument, ...currentDocuments]);
+  async function handleCreateDocument(title) {
+    await createDocument(title);
     setIsCreateModalOpen(false);
     navigate('/');
-  }
-
-  function updateDocumentContent(documentId, content) {
-    setDocuments((currentDocuments) =>
-      currentDocuments.map((document) =>
-        document.id === documentId
-          ? {
-              ...document,
-              content,
-              updatedAt: "À l'instant",
-              lastModifiedBy: 'Vous',
-            }
-          : document,
-      ),
-    );
-  }
-
-  function deleteDocument(documentId) {
-    setDocuments((currentDocuments) =>
-      currentDocuments.filter((document) => document.id !== documentId),
-    );
   }
 
   return (
@@ -185,7 +155,7 @@ function WorkspaceApp() {
       {isCreateModalOpen && (
         <CreateDocumentModal
           onCancel={() => setIsCreateModalOpen(false)}
-          onCreate={createDocument}
+          onCreate={handleCreateDocument}
         />
       )}
     </>
