@@ -8,14 +8,16 @@ import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 const port = Number(process.env.PORT ?? 3000);
-
+const frontendUrl = (process.env.FRONTEND_URL ?? 'http://localhost:5173').replace(/\/+$/, '');
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true
-}));
+app.use(
+  cors({
+    origin: frontendUrl,
+    credentials: true,
+  }),
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);

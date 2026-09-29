@@ -1,74 +1,184 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Room } from './components/Room.jsx';
+import { CreateDocumentModal } from './components/documents/CreateDocumentModal.jsx';
+import { Header } from './components/layout/Header.jsx';
+import { Sidebar } from './components/layout/Sidebar.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { socket } from './lib/socket.js';
+import { documents as initialDocuments } from './mocks/documents.js';
+import { DashboardPage } from './pages/DashboardPage.jsx';
+import { DocumentPage } from './pages/DocumentPage.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
+import { ProfilePage } from './pages/ProfilePage.jsx';
 import { RegisterPage } from './pages/RegisterPage.jsx';
 import { TwoFactorVerifyPage } from './pages/TwoFactorVerifyPage.jsx';
-import { ProfilePage } from './pages/ProfilePage.jsx';
-import { socket } from './lib/socket.js';
-import { Login } from './components/Login.jsx';
-import { Room } from './components/Room.jsx';
 
-
-// Vues gérées à la main en attendant l'ajout de react-router-dom.
-const VIEWS = {
+const AUTH_VIEWS = {
   LOGIN: 'login',
   REGISTER: 'register',
   TWO_FACTOR: 'two-factor',
 };
 
-function AuthenticatedApp() {
+function AuthenticationGate({ children }) {
   const { isAuthenticated, isLoading } = useAuth();
-  const [view, setView] = useState(VIEWS.LOGIN);
+  const [view, setView] = useState(AUTH_VIEWS.LOGIN);
 
   if (isLoading) {
     return <p>Chargement…</p>;
   }
 
   if (isAuthenticated) {
-    return <ProfilePage />;
+    return children;
   }
 
-  if (view === VIEWS.REGISTER) {
+  if (view === AUTH_VIEWS.REGISTER) {
     return (
       <RegisterPage
-        onSuccess={() => setView(VIEWS.LOGIN)}
-        onNavigateToLogin={() => setView(VIEWS.LOGIN)}
+        onSuccess={() => setView(AUTH_VIEWS.LOGIN)}
+        onNavigateToLogin={() => setView(AUTH_VIEWS.LOGIN)}
       />
     );
   }
 
-  if (view === VIEWS.TWO_FACTOR) {
-    return <TwoFactorVerifyPage onVerified={() => setView(VIEWS.LOGIN)} />;
+  if (view === AUTH_VIEWS.TWO_FACTOR) {
+    return <TwoFactorVerifyPage onVerified={() => setView(AUTH_VIEWS.LOGIN)} />;
   }
 
   return (
     <LoginPage
-      onNavigateToRegister={() => setView(VIEWS.REGISTER)}
-      onTwoFactorRequired={() => setView(VIEWS.TWO_FACTOR)}
+      onNavigateToRegister={() => setView(AUTH_VIEWS.REGISTER)}
+      onTwoFactorRequired={() => setView(AUTH_VIEWS.TWO_FACTOR)}
     />
   );
 }
 
-export function App() {
-    const [pseudo, setPseudo] = useState(null);
+function RealtimeRoomPage() {
+  const { user } = useAuth();
+  const pseudo = user?.nom ?? user?.email ?? 'Utilisateur';
 
-  function handleJoin(nom) {
+  useEffect(() => {
     socket.connect();
-    socket.emit('join', nom);
-    setPseudo(nom);
+    socket.emit('join', pseudo);
+
+    return () => socket.disconnect();
+  }, [pseudo]);
+
+  return <Room pseudo={pseudo} />;
+}
+
+function WorkspaceApp() {
+  const navigate = useNavigate();
+  const [documents, setDocuments] = useState(initialDocuments);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const ownedDocuments = documents.filter((document) => document.access === 'Propriétaire');
+  const sharedDocuments = documents.filter((document) => document.access === 'Partagé');
+
+  function createDocument(title) {
+    const newDocument = {
+      id: crypto.randomUUID(),
+      title,
+      content: '',
+      updatedAt: "À l'instant",
+      lastModifiedBy: 'Vous',
+      access: 'Propriétaire',
+    };
+
+    setDocuments((currentDocuments) => [newDocument, ...currentDocuments]);
+    setIsCreateModalOpen(false);
+    navigate('/');
   }
 
-  if (!pseudo) {
-    return <Login onJoin={handleJoin} />;
+  function updateDocumentContent(documentId, content) {
+    setDocuments((currentDocuments) =>
+      currentDocuments.map((document) =>
+        document.id === documentId
+          ? {
+              ...document,
+              content,
+              updatedAt: "À l'instant",
+              lastModifiedBy: 'Vous',
+            }
+          : document,
+      ),
+    );
   }
+
+  function deleteDocument(documentId) {
+    setDocuments((currentDocuments) =>
+      currentDocuments.filter((document) => document.id !== documentId),
+    );
+  }
+
   return (
-    <main>
-      <h1>Projet Spé 4</h1>
-      <AuthProvider>
-        <AuthenticatedApp />
-         <Room pseudo={pseudo} />
-      </AuthProvider>
-      
-    </main>
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <div className="app-shell">
+              <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+
+              <div className="workspace">
+                <Header />
+                <DashboardPage
+                  documents={ownedDocuments}
+                  title="Mes documents"
+                  description="Retrouve ici les documents dont tu es propriétaire."
+                  sectionTitle="Tous les documents"
+                />
+              </div>
+            </div>
+          }
+        />
+        <Route
+          path="/shared"
+          element={
+            <div className="app-shell">
+              <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+
+              <div className="workspace">
+                <Header />
+                <DashboardPage
+                  documents={sharedDocuments}
+                  title="Partagés avec moi"
+                  description="Retrouve ici les documents sur lesquels tu as été invité."
+                  sectionTitle="Documents partagés"
+                />
+              </div>
+            </div>
+          }
+        />
+        <Route
+          path="/documents/:documentId"
+          element={
+            <DocumentPage
+              documents={documents}
+              onContentChange={updateDocumentContent}
+              onDelete={deleteDocument}
+            />
+          }
+        />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/room" element={<RealtimeRoomPage />} />
+      </Routes>
+
+      {isCreateModalOpen && (
+        <CreateDocumentModal
+          onCancel={() => setIsCreateModalOpen(false)}
+          onCreate={createDocument}
+        />
+      )}
+    </>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <AuthenticationGate>
+        <WorkspaceApp />
+      </AuthenticationGate>
+    </AuthProvider>
   );
 }

@@ -36,6 +36,9 @@ services:
       DB_NAME: ${MYSQL_DATABASE:-projet_spe_4}
       DB_USER: ${MYSQL_USER:-projet_spe_4}
       DB_PASSWORD: ${MYSQL_PASSWORD:?Définis MYSQL_PASSWORD dans le fichier .env}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      JWT_SECRET: ${JWT_SECRET:?Définis JWT_SECRET dans le fichier .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
     ports:
       - '${API_PORT:-3000}:3000'
     volumes:
@@ -64,6 +67,7 @@ services:
     restart: unless-stopped
     environment:
       CHOKIDAR_USEPOLLING: 'true'
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
     ports:
       - '${FRONTEND_PORT:-5173}:5173'
     volumes:
