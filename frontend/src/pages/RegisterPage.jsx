@@ -28,34 +28,54 @@ export function RegisterPage({ onSuccess, onNavigateToLogin }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Créer un compte</h2>
+    <div className="auth-screen">
+      <div className="auth-card">
+        <div className="auth-head">
+          <h2>Créer un compte</h2>
+          <p className="auth-subtitle">Rejoins l'espace collaboratif.</p>
+        </div>
 
-      <label htmlFor="nom">Nom</label>
-      <input id="nom" name="nom" value={form.nom} onChange={handleChange} required />
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <label htmlFor="nom">Nom</label>
+            <input id="nom" name="nom" value={form.nom} onChange={handleChange} required />
+          </div>
 
-      <label htmlFor="email">Email</label>
-      <input id="email" name="email" type="email" value={form.email} onChange={handleChange} required />
+          <div className="auth-field">
+            <label htmlFor="email">Email</label>
+            <input id="email" name="email" type="email" value={form.email} onChange={handleChange} required />
+          </div>
 
-      <label htmlFor="password">Mot de passe</label>
-      <input
-        id="password"
-        name="password"
-        type="password"
-        value={form.password}
-        onChange={handleChange}
-        required
-      />
+          <div className="auth-field">
+            <label htmlFor="password">Mot de passe</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      {error && <p role="alert">{error}</p>}
+          {error && (
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+          )}
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Création…' : 'Créer le compte'}
-      </button>
+          <button className="auth-submit" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Création…' : 'Créer le compte'}
+          </button>
+        </form>
 
-      <button type="button" onClick={onNavigateToLogin}>
-        J'ai déjà un compte
-      </button>
-    </form>
+        <p className="auth-switch">
+          Déjà inscrit ?{' '}
+          <button type="button" className="auth-link" onClick={onNavigateToLogin}>
+            Se connecter
+          </button>
+        </p>
+      </div>
+    </div>
   );
 }

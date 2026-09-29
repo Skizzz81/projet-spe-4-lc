@@ -54,49 +54,60 @@ export function TwoFactorSetup({ isEnabled, onChange }) {
 
   if (isEnabled) {
     return (
-      <div>
-        <h3>Authentification à deux facteurs activée</h3>
-        <button type="button" onClick={handleDisable} disabled={isSubmitting}>
+      <div className="twofactor">
+        <h3>Double authentification activée</h3>
+        <button type="button" className="auth-secondary" onClick={handleDisable} disabled={isSubmitting}>
           Désactiver
         </button>
-        {error && <p role="alert">{error}</p>}
+        {error && (
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     );
   }
 
   return (
-    <div>
-      <h3>Activer l'authentification à deux facteurs</h3>
+    <div className="twofactor">
+      <h3>Activer la double authentification</h3>
 
       {!qrCode && (
-        <button type="button" onClick={handleStartSetup}>
+        <button type="button" className="auth-secondary" onClick={handleStartSetup}>
           Configurer le 2FA
         </button>
       )}
 
       {qrCode && (
-        <form onSubmit={handleEnable}>
+        <form className="auth-form" onSubmit={handleEnable}>
           <p>Scanne ce QR code avec ton application d'authentification.</p>
-          <img src={qrCode} alt="QR code d'authentification à deux facteurs" />
+          <img className="twofactor-qr" src={qrCode} alt="QR code d'authentification à deux facteurs" />
 
-          <label htmlFor="setup-code">Code à 6 chiffres</label>
-          <input
-            id="setup-code"
-            inputMode="numeric"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            value={code}
-            onChange={(event) => setCode(event.target.value)}
-            required
-          />
+          <div className="auth-field">
+            <label htmlFor="setup-code">Code à 6 chiffres</label>
+            <input
+              id="setup-code"
+              className="otp-input"
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+              required
+            />
+          </div>
 
-          <button type="submit" disabled={isSubmitting}>
+          <button className="auth-submit" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Activation…' : 'Confirmer et activer'}
           </button>
         </form>
       )}
 
-      {error && <p role="alert">{error}</p>}
+      {error && (
+        <p className="auth-error" role="alert">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

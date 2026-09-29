@@ -31,31 +31,49 @@ export function LoginPage({ onNavigateToRegister, onTwoFactorRequired }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Connexion</h2>
+    <div className="auth-screen">
+      <div className="auth-card">
+        <div className="auth-head">
+          <h2>Connexion</h2>
+          <p className="auth-subtitle">Accède à tes documents partagés.</p>
+        </div>
 
-      <label htmlFor="email">Email</label>
-      <input id="email" name="email" type="email" value={form.email} onChange={handleChange} required />
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <label htmlFor="email">Email</label>
+            <input id="email" name="email" type="email" value={form.email} onChange={handleChange} required />
+          </div>
 
-      <label htmlFor="password">Mot de passe</label>
-      <input
-        id="password"
-        name="password"
-        type="password"
-        value={form.password}
-        onChange={handleChange}
-        required
-      />
+          <div className="auth-field">
+            <label htmlFor="password">Mot de passe</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-      {error && <p role="alert">{error}</p>}
+          {error && (
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+          )}
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Connexion…' : 'Se connecter'}
-      </button>
+          <button className="auth-submit" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Connexion…' : 'Se connecter'}
+          </button>
+        </form>
 
-      <button type="button" onClick={onNavigateToRegister}>
-        Créer un compte
-      </button>
-    </form>
+        <p className="auth-switch">
+          Pas encore de compte ?{' '}
+          <button type="button" className="auth-link" onClick={onNavigateToRegister}>
+            Créer un compte
+          </button>
+        </p>
+      </div>
+    </div>
   );
 }
