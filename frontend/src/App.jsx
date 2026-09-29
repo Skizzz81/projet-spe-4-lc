@@ -101,6 +101,7 @@ function WorkspaceApp() {
     updateDocumentContent,
     deleteDocument,
     inviteDocumentMember,
+    applyRemoteDocumentContent,
   } = useDocuments();
   const ownedDocuments = documents.filter((document) => document.access === 'owner');
   const sharedDocuments = documents.filter((document) => document.access !== 'owner');
@@ -158,6 +159,7 @@ function WorkspaceApp() {
               onContentChange={updateDocumentContent}
               onDelete={deleteDocument}
               onInvite={inviteDocumentMember}
+              onRemoteContent={applyRemoteDocumentContent}
             />
           }
         />

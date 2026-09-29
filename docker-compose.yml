@@ -55,10 +55,13 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3001
+      INTERNAL_API_URL: http://api:3000
     ports:
       - '${REALTIME_PORT:-3001}:3001'
     volumes:
       - ./realtime:/app/realtime
+    depends_on:
+      - api
 
   frontend:
     build:

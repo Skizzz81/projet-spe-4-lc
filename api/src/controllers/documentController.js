@@ -1,4 +1,5 @@
 import {
+  findDocumentAccess,
   findDocumentsByUser,
   findUserByEmail,
   insertDocument,
@@ -7,6 +8,26 @@ import {
   removeDocument,
   updateDocumentContent,
 } from '../repositories/documentRepository.js';
+
+export async function getDocumentAccess(req, res, next) {
+  try {
+    const documentId = Number(req.params.documentId);
+
+    if (!Number.isInteger(documentId) || documentId <= 0) {
+      return res.status(400).json({ message: 'Identifiant de document invalide' });
+    }
+
+    const access = await findDocumentAccess(documentId, req.user.id);
+
+    if (!access) {
+      return res.status(404).json({ message: 'Document introuvable' });
+    }
+
+    res.json({ access });
+  } catch (error) {
+    next(error);
+  }
+}
 
 export async function listDocuments(req, res, next) {
   try {
