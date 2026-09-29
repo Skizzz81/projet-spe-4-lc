@@ -1,9 +1,14 @@
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentEditor } from '../components/editor/DocumentEditor.jsx';
 
-export function DocumentPage({ documents, onContentChange, onDelete }) {
+export function DocumentPage({ documents, onContentChange, onDelete, onInvite }) {
   const { documentId } = useParams();
   const navigate = useNavigate();
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteMessage, setInviteMessage] = useState('');
+  const [inviteError, setInviteError] = useState('');
+  const [isInviting, setIsInviting] = useState(false);
   const document = documents.find((item) => String(item.id) === documentId);
 
   async function handleDelete() {
@@ -17,6 +22,23 @@ export function DocumentPage({ documents, onContentChange, onDelete }) {
 
     await onDelete(document.id);
     navigate('/');
+  }
+
+  async function handleInvite(event) {
+    event.preventDefault();
+    setInviteMessage('');
+    setInviteError('');
+    setIsInviting(true);
+
+    try {
+      const data = await onInvite(document.id, inviteEmail);
+      setInviteMessage(data.message);
+      setInviteEmail('');
+    } catch (error) {
+      setInviteError(error.message);
+    } finally {
+      setIsInviting(false);
+    }
   }
 
   if (!document) {
@@ -58,6 +80,33 @@ export function DocumentPage({ documents, onContentChange, onDelete }) {
       </header>
 
       {!canEdit && <p>Tu disposes d’un accès en lecture seule.</p>}
+
+      {isOwner && (
+        <section className="invite-section">
+          <h2>Inviter une personne</h2>
+          <form className="invite-form" onSubmit={handleInvite}>
+            <label htmlFor="invite-email">Adresse email</label>
+            <div>
+              <input
+                id="invite-email"
+                type="email"
+                value={inviteEmail}
+                onChange={(event) => setInviteEmail(event.target.value)}
+                placeholder="utilisateur@exemple.com"
+                required
+              />
+              <button className="primary-button" type="submit" disabled={isInviting}>
+                {isInviting ? 'Invitation…' : 'Inviter'}
+              </button>
+            </div>
+          </form>
+
+          <div aria-live="polite">
+            {inviteMessage && <p className="invite-success">{inviteMessage}</p>}
+            {inviteError && <p className="invite-error">{inviteError}</p>}
+          </div>
+        </section>
+      )}
 
       <DocumentEditor
         content={document.content}

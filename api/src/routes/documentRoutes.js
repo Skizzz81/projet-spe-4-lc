@@ -2,6 +2,7 @@ import express from 'express';
 import {
   createDocument,
   deleteDocument,
+  inviteDocumentMember,
   listDocuments,
   updateDocument,
 } from '../controllers/documentController.js';
@@ -13,6 +14,7 @@ router.use(authMiddleware);
 
 router.get('/', listDocuments);
 router.post('/', createDocument);
+router.post('/:documentId/members', inviteDocumentMember);
 router.patch('/:documentId', updateDocument);
 router.delete('/:documentId', deleteDocument);
 

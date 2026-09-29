@@ -54,3 +54,29 @@ export async function removeDocument(documentId, userId) {
 
   return result.affectedRows;
 }
+
+export async function findUserByEmail(email) {
+  const [users] = await database.query(
+    'SELECT id, nom, email FROM users WHERE email = ? LIMIT 1',
+    [email],
+  );
+
+  return users[0] ?? null;
+}
+
+export async function isDocumentOwner(documentId, userId) {
+  const [documents] = await database.query(
+    'SELECT id FROM documents WHERE id = ? AND owner_id = ? LIMIT 1',
+    [documentId, userId],
+  );
+
+  return documents.length > 0;
+}
+
+export async function insertDocumentMember(documentId, userId) {
+  await database.query(
+    `INSERT INTO document_members (document_id, user_id, permission)
+     VALUES (?, ?, 'editor')`,
+    [documentId, userId],
+  );
+}
