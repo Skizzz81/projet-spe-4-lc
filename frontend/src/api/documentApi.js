@@ -40,3 +40,8 @@ export function deleteDocument(documentId) {
   // DELETE /api/documents/:documentId
   return request(`/${documentId}`, { method: 'DELETE' });
 }
+
+export function inviteDocumentMember(documentId, email) {
+  // POST /api/documents/:documentId/members
+  return request(`/${documentId}/members`, { method: 'POST', body: { email } });
+}

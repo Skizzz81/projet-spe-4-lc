@@ -1,6 +1,9 @@
 import {
   findDocumentsByUser,
+  findUserByEmail,
   insertDocument,
+  insertDocumentMember,
+  isDocumentOwner,
   removeDocument,
   updateDocumentContent,
 } from '../repositories/documentRepository.js';
@@ -80,6 +83,50 @@ export async function deleteDocument(req, res, next) {
 
     res.status(204).end();
   } catch (error) {
+    next(error);
+  }
+}
+
+export async function inviteDocumentMember(req, res, next) {
+  try {
+    const documentId = Number(req.params.documentId);
+    const email = req.body.email?.trim().toLowerCase();
+
+    if (!Number.isInteger(documentId) || documentId <= 0) {
+      return res.status(400).json({ message: 'Identifiant de document invalide' });
+    }
+
+    if (!email) {
+      return res.status(400).json({ message: "L'adresse email est obligatoire" });
+    }
+
+    const ownsDocument = await isDocumentOwner(documentId, req.user.id);
+
+    if (!ownsDocument) {
+      return res.status(404).json({ message: 'Document introuvable' });
+    }
+
+    const invitedUser = await findUserByEmail(email);
+
+    if (!invitedUser) {
+      return res.status(404).json({ message: 'Aucun utilisateur ne possède cette adresse email' });
+    }
+
+    if (invitedUser.id === req.user.id) {
+      return res.status(400).json({ message: 'Tu es déjà propriétaire de ce document' });
+    }
+
+    await insertDocumentMember(documentId, invitedUser.id);
+
+    res.status(201).json({
+      message: `${invitedUser.nom} a été invité sur le document`,
+      member: invitedUser,
+    });
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: 'Cet utilisateur est déjà invité' });
+    }
+
     next(error);
   }
 }

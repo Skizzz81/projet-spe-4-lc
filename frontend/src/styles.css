@@ -433,6 +433,52 @@ button {
   border-color: #b91c1c;
 }
 
+.invite-section {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+}
+
+.invite-section h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.invite-form label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.invite-form > div {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.invite-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.625rem;
+}
+
+.invite-success,
+.invite-error {
+  margin: 0.75rem 0 0;
+}
+
+.invite-success {
+  color: #15803d;
+}
+
+.invite-error {
+  color: #b91c1c;
+}
+
 .document-editor {
   min-height: 32rem;
   background: var(--color-surface);
@@ -468,6 +514,10 @@ button {
 
   .danger-button {
     width: 100%;
+  }
+
+  .invite-form > div {
+    flex-direction: column;
   }
 }
 
