@@ -4,6 +4,7 @@ import { Room } from './components/Room.jsx';
 import { CreateDocumentModal } from './components/documents/CreateDocumentModal.jsx';
 import { Header } from './components/layout/Header.jsx';
 import { Sidebar } from './components/layout/Sidebar.jsx';
+import { TwoFactorSetup } from './components/TwoFactorSetup.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { useDocuments } from './hooks/useDocuments.js';
 import { socket } from './lib/socket.js';
@@ -21,7 +22,8 @@ const AUTH_VIEWS = {
 };
 
 function AuthenticationGate({ children }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const navigate = useNavigate();
   const [view, setView] = useState(AUTH_VIEWS.LOGIN);
 
   if (isLoading) {
@@ -29,6 +31,16 @@ function AuthenticationGate({ children }) {
   }
 
   if (isAuthenticated) {
+    if (!user?.two_factor_enabled) {
+      return (
+        <main>
+          <h2>Authentification à deux facteurs requise</h2>
+          <p>Configure le 2FA pour accéder à tes documents.</p>
+          <TwoFactorSetup isEnabled={false} />
+        </main>
+      );
+    }
+
     return children;
   }
 
@@ -42,7 +54,14 @@ function AuthenticationGate({ children }) {
   }
 
   if (view === AUTH_VIEWS.TWO_FACTOR) {
-    return <TwoFactorVerifyPage onVerified={() => setView(AUTH_VIEWS.LOGIN)} />;
+    return (
+      <TwoFactorVerifyPage
+        onVerified={() => {
+          setView(AUTH_VIEWS.LOGIN);
+          navigate('/', { replace: true });
+        }}
+      />
+    );
   }
 
   return (
