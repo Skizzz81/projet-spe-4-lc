@@ -1,13 +1,73 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Route, Routes, useNavigate } from 'react-router-dom';
-import { Sidebar } from './components/layout/Sidebar.jsx';
-import { Header } from './components/layout/Header.jsx';
+import { Room } from './components/Room.jsx';
 import { CreateDocumentModal } from './components/documents/CreateDocumentModal.jsx';
+import { Header } from './components/layout/Header.jsx';
+import { Sidebar } from './components/layout/Sidebar.jsx';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { socket } from './lib/socket.js';
+import { documents as initialDocuments } from './mocks/documents.js';
 import { DashboardPage } from './pages/DashboardPage.jsx';
 import { DocumentPage } from './pages/DocumentPage.jsx';
-import { documents as initialDocuments } from './mocks/documents.js';
+import { LoginPage } from './pages/LoginPage.jsx';
+import { ProfilePage } from './pages/ProfilePage.jsx';
+import { RegisterPage } from './pages/RegisterPage.jsx';
+import { TwoFactorVerifyPage } from './pages/TwoFactorVerifyPage.jsx';
 
-export function App() {
+const AUTH_VIEWS = {
+  LOGIN: 'login',
+  REGISTER: 'register',
+  TWO_FACTOR: 'two-factor',
+};
+
+function AuthenticationGate({ children }) {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [view, setView] = useState(AUTH_VIEWS.LOGIN);
+
+  if (isLoading) {
+    return <p>Chargement…</p>;
+  }
+
+  if (isAuthenticated) {
+    return children;
+  }
+
+  if (view === AUTH_VIEWS.REGISTER) {
+    return (
+      <RegisterPage
+        onSuccess={() => setView(AUTH_VIEWS.LOGIN)}
+        onNavigateToLogin={() => setView(AUTH_VIEWS.LOGIN)}
+      />
+    );
+  }
+
+  if (view === AUTH_VIEWS.TWO_FACTOR) {
+    return <TwoFactorVerifyPage onVerified={() => setView(AUTH_VIEWS.LOGIN)} />;
+  }
+
+  return (
+    <LoginPage
+      onNavigateToRegister={() => setView(AUTH_VIEWS.REGISTER)}
+      onTwoFactorRequired={() => setView(AUTH_VIEWS.TWO_FACTOR)}
+    />
+  );
+}
+
+function RealtimeRoomPage() {
+  const { user } = useAuth();
+  const pseudo = user?.nom ?? user?.email ?? 'Utilisateur';
+
+  useEffect(() => {
+    socket.connect();
+    socket.emit('join', pseudo);
+
+    return () => socket.disconnect();
+  }, [pseudo]);
+
+  return <Room pseudo={pseudo} />;
+}
+
+function WorkspaceApp() {
   const navigate = useNavigate();
   const [documents, setDocuments] = useState(initialDocuments);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -99,6 +159,8 @@ export function App() {
             />
           }
         />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/room" element={<RealtimeRoomPage />} />
       </Routes>
 
       {isCreateModalOpen && (
@@ -108,5 +170,15 @@ export function App() {
         />
       )}
     </>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <AuthenticationGate>
+        <WorkspaceApp />
+      </AuthenticationGate>
+    </AuthProvider>
   );
 }
