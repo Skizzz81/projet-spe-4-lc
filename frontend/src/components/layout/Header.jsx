@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom';
+
 export function Header() {
+  const navigate = useNavigate();
+
   return (
     <header className="topbar">
       <div className="topbar-actions">
@@ -6,6 +10,7 @@ export function Header() {
           className="profile-button"
           type="button"
           aria-label="Ouvrir le profil"
+          onClick={() => navigate('/profile')}
         >
           <span className="profile-avatar" aria-hidden="true">
             AZ
