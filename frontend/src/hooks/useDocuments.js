@@ -49,10 +49,15 @@ export function useDocuments() {
     );
   }
 
+  function inviteDocumentMember(documentId, email) {
+    return documentApi.inviteDocumentMember(documentId, email);
+  }
+
   return {
     documents,
     createDocument,
     updateDocumentContent,
     deleteDocument,
+    inviteDocumentMember,
   };
 }

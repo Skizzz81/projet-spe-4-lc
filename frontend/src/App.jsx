@@ -89,7 +89,13 @@ function RealtimeRoomPage() {
 function WorkspaceApp() {
   const navigate = useNavigate();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const { documents, createDocument, updateDocumentContent, deleteDocument } = useDocuments();
+  const {
+    documents,
+    createDocument,
+    updateDocumentContent,
+    deleteDocument,
+    inviteDocumentMember,
+  } = useDocuments();
   const ownedDocuments = documents.filter((document) => document.access === 'owner');
   const sharedDocuments = documents.filter((document) => document.access !== 'owner');
 
@@ -145,6 +151,7 @@ function WorkspaceApp() {
               documents={documents}
               onContentChange={updateDocumentContent}
               onDelete={deleteDocument}
+              onInvite={inviteDocumentMember}
             />
           }
         />
