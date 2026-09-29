@@ -1026,3 +1026,151 @@ button {
 .auth-secondary:hover {
   background: #e0ecff;
 }
+
+/* --- Page profil --- */
+.profile-page {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.profile-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+}
+
+.profile-header p {
+  margin: 0.35rem 0 0;
+  color: var(--color-text-muted);
+}
+
+.profile-card {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+}
+
+.profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-avatar-lg {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  background: #7c3aed;
+  border-radius: 50%;
+}
+
+.profile-name-lg {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.profile-email {
+  margin: 0.15rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.profile-badge {
+  margin-left: auto;
+  padding: 0.25rem 0.7rem;
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--color-primary-soft);
+  border-radius: 999px;
+}
+
+.profile-info {
+  margin: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.profile-row dt {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.profile-row dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.profile-section-title {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.profile-security {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.profile-security-label {
+  margin: 0;
+  font-weight: 600;
+}
+
+.profile-security-hint {
+  margin: 0.2rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.profile-status {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 999px;
+}
+
+.profile-status.on {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.profile-status.off {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.profile-logout {
+  justify-self: start;
+  padding: 0.6rem 1.1rem;
+  color: #b91c1c;
+  font-weight: 600;
+  background: #fff;
+  border: 1px solid #fecaca;
+  border-radius: 0.65rem;
+}
+
+.profile-logout:hover {
+  background: #fef2f2;
+}
