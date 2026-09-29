@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 
 const port = Number(process.env.PORT ?? 3001);
+const apiUrl = process.env.INTERNAL_API_URL ?? 'http://localhost:3000';
 
 // En dev le frontend Vite tourne sur un autre port, il faut autoriser son origine.
 const allowedOrigin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173';
@@ -21,6 +22,7 @@ const io = new Server(httpServer, {
   cors: {
     origin: allowedOrigin,
     methods: ['GET', 'POST'],
+    credentials: true,
   },
 });
 
@@ -35,7 +37,29 @@ function listUsers() {
   return [...pseudos.entries()].map(([id, pseudo]) => ({ id, pseudo }));
 }
 
+function getDocumentRoom(documentId) {
+  return `document:${documentId}`;
+}
+
+async function getDocumentAccess(socket, documentId) {
+  const cookie = socket.handshake.headers.cookie;
+
+  if (!cookie) return null;
+
+  const response = await fetch(`${apiUrl}/api/documents/${documentId}/access`, {
+    headers: { cookie },
+  });
+
+  if (!response.ok) return null;
+
+  const data = await response.json();
+  const allowedAccess = ['owner', 'editor', 'viewer'];
+
+  return allowedAccess.includes(data.access) ? data.access : null;
+}
+
 io.on('connection', (socket) => {
+  socket.data.documentAccess = new Map();
   console.log(`Connexion temps réel : ${socket.id}`);
 
   socket.on('join', (pseudo) => {
@@ -46,6 +70,57 @@ io.on('connection', (socket) => {
     // On previent tout le monde de la nouvelle liste des présents.
     io.to(ROOM).emit('users', listUsers());
     console.log(`${nom} a rejoint la salle`);
+  });
+
+  socket.on('document:join', async (documentId, respond) => {
+    const id = Number(documentId);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      if (typeof respond === 'function') respond({ ok: false });
+      return;
+    }
+
+    try {
+      const access = await getDocumentAccess(socket, id);
+
+      if (!access) {
+        if (typeof respond === 'function') respond({ ok: false });
+        return;
+      }
+
+      socket.data.documentAccess.set(id, access);
+      socket.join(getDocumentRoom(id));
+
+      if (typeof respond === 'function') respond({ ok: true, access });
+    } catch (error) {
+      console.error(`Vérification impossible pour le document ${id}:`, error.message);
+      if (typeof respond === 'function') respond({ ok: false });
+    }
+  });
+
+  socket.on('document:leave', (documentId) => {
+    const id = Number(documentId);
+
+    if (!Number.isInteger(id) || id <= 0) return;
+
+    socket.data.documentAccess.delete(id);
+    socket.leave(getDocumentRoom(id));
+  });
+
+  socket.on('document:update', (payload = {}) => {
+    const documentId = Number(payload.documentId);
+    const { content } = payload;
+
+    if (!Number.isInteger(documentId) || documentId <= 0) return;
+    if (typeof content !== 'string') return;
+
+    const room = getDocumentRoom(documentId);
+    const access = socket.data.documentAccess.get(documentId);
+
+    if (!socket.rooms.has(room)) return;
+    if (access !== 'owner' && access !== 'editor') return;
+
+    socket.to(room).emit('document:updated', { documentId, content });
   });
 
   socket.on('chat:message', (text) => {

@@ -23,6 +23,21 @@ export async function findDocumentsByUser(userId) {
   return documents;
 }
 
+export async function findDocumentAccess(documentId, userId) {
+  const [documents] = await database.query(
+    `SELECT
+       CASE WHEN d.owner_id = ? THEN 'owner' ELSE dm.permission END AS access
+     FROM documents d
+     LEFT JOIN document_members dm
+       ON dm.document_id = d.id AND dm.user_id = ?
+     WHERE d.id = ? AND (d.owner_id = ? OR dm.user_id IS NOT NULL)
+     LIMIT 1`,
+    [userId, userId, documentId, userId],
+  );
+
+  return documents[0]?.access ?? null;
+}
+
 export async function insertDocument(userId, title) {
   const [result] = await database.query(
     `INSERT INTO documents (owner_id, last_modified_by, title, content)

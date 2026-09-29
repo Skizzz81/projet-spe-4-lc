@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import * as documentApi from '../api/documentApi.js';
 
 export function useDocuments() {
@@ -53,11 +53,20 @@ export function useDocuments() {
     return documentApi.inviteDocumentMember(documentId, email);
   }
 
+  const applyRemoteDocumentContent = useCallback((documentId, content) => {
+    setDocuments((currentDocuments) =>
+      currentDocuments.map((document) =>
+        document.id === documentId ? { ...document, content } : document,
+      ),
+    );
+  }, []);
+
   return {
     documents,
     createDocument,
     updateDocumentContent,
     deleteDocument,
     inviteDocumentMember,
+    applyRemoteDocumentContent,
   };
 }

@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentEditor } from '../components/editor/DocumentEditor.jsx';
+import { socket } from '../lib/socket.js';
 
-export function DocumentPage({ documents, onContentChange, onDelete, onInvite }) {
+export function DocumentPage({
+  documents,
+  onContentChange,
+  onDelete,
+  onInvite,
+  onRemoteContent,
+}) {
   const { documentId } = useParams();
   const navigate = useNavigate();
   const [inviteEmail, setInviteEmail] = useState('');
@@ -10,6 +17,31 @@ export function DocumentPage({ documents, onContentChange, onDelete, onInvite })
   const [inviteError, setInviteError] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const document = documents.find((item) => String(item.id) === documentId);
+  const activeDocumentId = document?.id;
+
+  useEffect(() => {
+    if (!activeDocumentId) return undefined;
+
+    socket.connect();
+    socket.emit('document:join', activeDocumentId);
+
+    return () => {
+      socket.emit('document:leave', activeDocumentId);
+      socket.disconnect();
+    };
+  }, [activeDocumentId]);
+
+  useEffect(() => {
+    function handleRemoteUpdate({ documentId: updatedDocumentId, content }) {
+      if (updatedDocumentId !== activeDocumentId) return;
+
+      onRemoteContent(updatedDocumentId, content);
+    }
+
+    socket.on('document:updated', handleRemoteUpdate);
+
+    return () => socket.off('document:updated', handleRemoteUpdate);
+  }, [activeDocumentId, onRemoteContent]);
 
   async function handleDelete() {
     const isConfirmed = window.confirm(
@@ -39,6 +71,11 @@ export function DocumentPage({ documents, onContentChange, onDelete, onInvite })
     } finally {
       setIsInviting(false);
     }
+  }
+
+  function handleContentChange(content) {
+    onContentChange(document.id, content);
+    socket.emit('document:update', { documentId: document.id, content });
   }
 
   if (!document) {
@@ -110,7 +147,7 @@ export function DocumentPage({ documents, onContentChange, onDelete, onInvite })
 
       <DocumentEditor
         content={document.content}
-        onChange={(content) => onContentChange(document.id, content)}
+        onChange={handleContentChange}
         readOnly={!canEdit}
       />
     </main>
