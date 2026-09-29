@@ -926,3 +926,12 @@ button {
 .auth-link:hover {
   text-decoration: underline;
 }
+
+/* Champ du code a 6 chiffres (OTP) */
+.otp-input {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.55rem;
+  padding-left: 0.55rem; /* recentre le texte a cause du letter-spacing */
+}

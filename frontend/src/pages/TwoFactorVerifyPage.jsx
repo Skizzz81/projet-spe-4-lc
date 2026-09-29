@@ -23,27 +23,40 @@ export function TwoFactorVerifyPage({ onVerified }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Vérification en deux étapes</h2>
-      <p>Entre le code généré par ton application d'authentification.</p>
+    <div className="auth-screen">
+      <div className="auth-card">
+        <div className="auth-head">
+          <h2>Vérification en deux étapes</h2>
+          <p className="auth-subtitle">Entre le code généré par ton application d'authentification.</p>
+        </div>
 
-      <label htmlFor="code">Code à 6 chiffres</label>
-      <input
-        id="code"
-        name="code"
-        inputMode="numeric"
-        pattern="[0-9]{6}"
-        maxLength={6}
-        value={code}
-        onChange={(event) => setCode(event.target.value)}
-        required
-      />
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="auth-field">
+            <label htmlFor="code">Code à 6 chiffres</label>
+            <input
+              id="code"
+              name="code"
+              className="otp-input"
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+              required
+            />
+          </div>
 
-      {error && <p role="alert">{error}</p>}
+          {error && (
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+          )}
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Vérification…' : 'Valider'}
-      </button>
-    </form>
+          <button className="auth-submit" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Vérification…' : 'Valider'}
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }
