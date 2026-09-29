@@ -5,6 +5,7 @@ import { checkDatabaseConnection, database } from './config/database.js';
 import errorHandler from './middlewares/errorHandler.js';
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import documentRoutes from './routes/documentRoutes.js';
 
 const app = express();
 const port = Number(process.env.PORT ?? 3000);
@@ -21,6 +22,7 @@ app.use(
 
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use('/api/documents', documentRoutes);
 
 app.get('/health', async (_request, response) => {
   try {
