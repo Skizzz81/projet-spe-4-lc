@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 // Donnees bouchon en attendant le branchement au back (fait par un collegue).
 // Le back GET /api/auth/profile renvoie : { id, nom, email, role, two_factor_enabled }
 const utilisateurBouchon = {
@@ -17,6 +19,14 @@ function getInitiales(nom) {
 export function ProfilePage() {
   const utilisateur = utilisateurBouchon;
   const roleLisible = utilisateur.role === 'admin' ? 'Administrateur' : 'Utilisateur';
+
+  // Etat local juste pour l'affichage, le vrai comportement sera branche plus tard.
+  const [doubleAuth, setDoubleAuth] = useState(utilisateur.two_factor_enabled);
+
+  function handleLogout() {
+    // TODO: branchement (appel API logout + redirection) a faire par le collegue.
+    console.log('Déconnexion demandée');
+  }
 
   return (
     <div className="profile-page">
@@ -50,6 +60,30 @@ export function ProfilePage() {
           </div>
         </dl>
       </div>
+
+      <div className="profile-card">
+        <h2 className="profile-section-title">Sécurité</h2>
+
+        <div className="profile-security">
+          <div>
+            <p className="profile-security-label">Double authentification</p>
+            <p className="profile-security-hint">
+              Ajoute une couche de sécurité avec un code à usage unique.
+            </p>
+          </div>
+          <span className={doubleAuth ? 'profile-status on' : 'profile-status off'}>
+            {doubleAuth ? 'Activée' : 'Désactivée'}
+          </span>
+        </div>
+
+        <button type="button" className="auth-secondary" onClick={() => setDoubleAuth((etat) => !etat)}>
+          {doubleAuth ? 'Désactiver la double authentification' : 'Activer la double authentification'}
+        </button>
+      </div>
+
+      <button type="button" className="profile-logout" onClick={handleLogout}>
+        Se déconnecter
+      </button>
     </div>
   );
 }
