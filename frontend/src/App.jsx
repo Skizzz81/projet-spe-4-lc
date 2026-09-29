@@ -33,11 +33,17 @@ function AuthenticationGate({ children }) {
   if (isAuthenticated) {
     if (!user?.two_factor_enabled) {
       return (
-        <main>
-          <h2>Authentification à deux facteurs requise</h2>
-          <p>Configure le 2FA pour accéder à tes documents.</p>
-          <TwoFactorSetup isEnabled={false} />
-        </main>
+        <div className="auth-screen">
+          <div className="auth-card">
+            <div className="auth-head">
+              <h2>Sécurise ton compte</h2>
+              <p className="auth-subtitle">
+                Active la double authentification pour accéder à tes documents.
+              </p>
+            </div>
+            <TwoFactorSetup isEnabled={false} />
+          </div>
+        </div>
       );
     }
 

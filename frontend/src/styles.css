@@ -935,3 +935,44 @@ button {
   letter-spacing: 0.55rem;
   padding-left: 0.55rem; /* recentre le texte a cause du letter-spacing */
 }
+
+/* Bloc de configuration du 2FA (QR code) */
+.twofactor {
+  display: grid;
+  gap: 1rem;
+}
+
+.twofactor h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.twofactor p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.twofactor-qr {
+  width: 12rem;
+  height: 12rem;
+  align-self: center;
+  padding: 0.5rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+}
+
+.auth-secondary {
+  width: 100%;
+  padding: 0.65rem;
+  color: var(--color-primary);
+  font-weight: 600;
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 0.65rem;
+}
+
+.auth-secondary:hover {
+  background: #e0ecff;
+}
