@@ -152,7 +152,7 @@ export function DocumentPage({
         readOnly={!canEdit}
       />
 
-      <DocumentCollaboration />
+      <DocumentCollaboration documentId={activeDocumentId} />
     </main>
   );
 }

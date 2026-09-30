@@ -5,29 +5,29 @@ import { useVoiceCall } from '../lib/useVoiceCall.js';
 import { Chat } from './Chat.jsx';
 
 // Panneau d'appel + messagerie affiche pendant l'edition d'un document.
-// Le socket est deja connecte par la page document, on ajoute juste la presence.
-export function DocumentCollaboration() {
+// La presence est liee au document courant et au vrai compte connecte.
+export function DocumentCollaboration({ documentId }) {
   const { user } = useAuth();
-  const pseudo = user?.nom ?? user?.email ?? 'Utilisateur';
-  const [users, setUsers] = useState([]);
+  const monId = user?.id;
+  const [participants, setParticipants] = useState([]);
   const { call, muted, remoteAudioRef, startCall, acceptCall, hangup, toggleMute } =
     useVoiceCall();
 
-  // On signale sa presence pour apparaitre dans la liste et etre appelable.
   useEffect(() => {
-    socket.emit('join', pseudo);
-  }, [pseudo]);
+    if (!documentId) return undefined;
 
-  useEffect(() => {
-    function onUsers(liste) {
-      setUsers(liste);
+    function onList(liste) {
+      setParticipants(liste);
     }
-    socket.on('users', onUsers);
-    return () => socket.off('users', onUsers);
-  }, []);
 
-  // Les autres presents (tout le monde sauf soi).
-  const autres = users.filter((u) => u.id !== socket.id);
+    socket.on('presence:list', onList);
+    socket.emit('presence:sync', documentId);
+
+    return () => socket.off('presence:list', onList);
+  }, [documentId]);
+
+  // Les autres presents (tout le monde sauf mon propre compte).
+  const autres = participants.filter((p) => p.userId !== monId);
 
   return (
     <section className="doc-collab">
@@ -38,10 +38,13 @@ export function DocumentCollaboration() {
           <h3>En ligne ({autres.length})</h3>
           {autres.length === 0 && <p className="vide">Personne d’autre pour l’instant.</p>}
           <ul>
-            {autres.map((u) => (
-              <li key={u.id}>
-                <span>{u.pseudo}</span>
-                <button onClick={() => startCall(u)} disabled={Boolean(call)}>
+            {autres.map((p) => (
+              <li key={p.userId}>
+                <span>{p.nom}</span>
+                <button
+                  onClick={() => startCall({ id: p.socketId, pseudo: p.nom })}
+                  disabled={Boolean(call)}
+                >
                   Appeler
                 </button>
               </li>
