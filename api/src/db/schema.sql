@@ -16,16 +16,36 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS folders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  owner_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL
+    DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX idx_folders_owner (owner_id),
+
+  CONSTRAINT fk_folders_owner
+    FOREIGN KEY (owner_id)
+    REFERENCES users(id)
+    ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS documents (
   id INT AUTO_INCREMENT PRIMARY KEY,
   owner_id INT NOT NULL,
   last_modified_by INT NULL,
+  folder_id INT NULL,
   title VARCHAR(255) NOT NULL,
   content LONGTEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL
     DEFAULT CURRENT_TIMESTAMP
     ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX idx_documents_folder (folder_id),
 
   CONSTRAINT fk_documents_owner
     FOREIGN KEY (owner_id)
@@ -35,6 +55,11 @@ CREATE TABLE IF NOT EXISTS documents (
   CONSTRAINT fk_documents_last_modifier
     FOREIGN KEY (last_modified_by)
     REFERENCES users(id)
+    ON DELETE SET NULL,
+
+  CONSTRAINT fk_documents_folder
+    FOREIGN KEY (folder_id)
+    REFERENCES folders(id)
     ON DELETE SET NULL
 );
 

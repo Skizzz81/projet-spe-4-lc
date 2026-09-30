@@ -11,8 +11,8 @@ export function useDocuments() {
       .catch(console.error);
   }, []);
 
-  async function createDocument(title) {
-    const data = await documentApi.createDocument(title);
+  async function createDocument(title, folderId = null) {
+    const data = await documentApi.createDocument(title, folderId);
     setDocuments((currentDocuments) => [data.document, ...currentDocuments]);
   }
 

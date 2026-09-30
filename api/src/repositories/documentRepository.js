@@ -7,6 +7,7 @@ export async function findDocumentsByUser(userId) {
        d.title,
        d.content,
        d.owner_id AS ownerId,
+       d.folder_id AS folderId,
        CASE WHEN d.owner_id = ? THEN 'owner' ELSE dm.permission END AS access,
        COALESCE(modifier.nom, owner.nom) AS lastModifiedBy,
        d.updated_at AS updatedAt
@@ -38,11 +39,11 @@ export async function findDocumentAccess(documentId, userId) {
   return documents[0]?.access ?? null;
 }
 
-export async function insertDocument(userId, title) {
+export async function insertDocument(userId, title, folderId) {
   const [result] = await database.query(
-    `INSERT INTO documents (owner_id, last_modified_by, title, content)
-     VALUES (?, ?, ?, '')`,
-    [userId, userId, title],
+    `INSERT INTO documents (owner_id, last_modified_by, folder_id, title, content)
+     VALUES (?, ?, ?, ?, '')`,
+    [userId, userId, folderId, title],
   );
 
   return result.insertId;
