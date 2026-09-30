@@ -1264,3 +1264,20 @@ button {
   cursor: not-allowed;
   opacity: 0.55;
 }
+
+/* --- Panneau appel + messagerie dans la page document --- */
+.doc-collab {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.doc-collab h2 {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+}
+
+/* Sur la page document le chat n'a pas besoin d'etre aussi haut. */
+.doc-collab .chat {
+  height: 20rem;
+}
