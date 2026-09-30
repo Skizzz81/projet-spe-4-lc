@@ -938,6 +938,7 @@ button {
 
 .barre-message input {
   flex: 1;
+  min-width: 0; /* laisse l'input retrecir pour que le bouton ne deborde pas */
 }
 
 /* --- Barre d'appel --- */
@@ -1359,3 +1360,213 @@ button {
   cursor: not-allowed;
   opacity: 0.55;
 }
+
+/* --- Panneau appel + messagerie dans la page document --- */
+/* Espace de travail : appels/invite a gauche, document au centre, chat a droite. */
+.doc-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 19rem) minmax(0, 1fr) minmax(0, 22rem);
+  gap: 1.25rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+
+.doc-workspace > * {
+  min-width: 0;
+}
+
+/* Les panneaux lateraux restent visibles quand le document s'allonge. */
+.doc-workspace > .doc-collab {
+  position: sticky;
+  top: 1rem;
+}
+
+/* Colonne de gauche : invitation empilee au-dessus des appels. */
+.collab-panel {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Sans ca, les cartes gardent leur largeur de contenu et debordent sur l'editeur. */
+.collab-panel > * {
+  min-width: 0;
+}
+
+.collab-panel .invite-section {
+  margin-bottom: 0;
+}
+
+@media (max-width: 1024px) {
+  .doc-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .doc-workspace > .doc-collab {
+    position: static;
+  }
+}
+
+/* Barre de recherche des participants a appeler. */
+.participant-search {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.participant-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.participant-name {
+  font-weight: 600;
+}
+
+.participant-email {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+}
+
+/* Commandes de l'appel de groupe */
+.call-join {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.call-controls {
+  display: grid;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 0.6rem;
+}
+
+.call-status {
+  font-weight: 700;
+}
+
+.call-members {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  list-style: none;
+}
+
+.call-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.call-actions button {
+  flex: 1;
+}
+
+.doc-collab .call-leave {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.doc-collab .call-leave:hover:not(:disabled) {
+  background: #991b1b;
+}
+
+.online-title {
+  margin: 0 0 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+/* Les deux blocs prennent le meme style de carte que le reste de l'app. */
+.doc-collab .participants,
+.doc-collab .chat {
+  padding: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
+}
+
+.doc-collab .chat {
+  height: 30rem;
+}
+
+.doc-collab .participants h3,
+.doc-collab .chat h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.doc-collab .participants li {
+  border-top: 1px solid var(--color-border);
+}
+
+.doc-collab .participants li:first-of-type {
+  border-top: 0;
+}
+
+.doc-collab .message {
+  background: #f3f4f6;
+}
+
+.doc-collab .message.moi {
+  background: var(--color-primary-soft);
+}
+
+.doc-collab .message .auteur {
+  color: var(--color-text-muted);
+}
+
+.doc-collab input {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.625rem;
+}
+
+.doc-collab input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+/* Boutons au style primaire de l'app. */
+.doc-collab button {
+  min-height: 2.625rem;
+  padding: 0.5rem 1rem;
+  color: #fff;
+  font-weight: 700;
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  border-radius: 0.625rem;
+}
+
+.doc-collab button:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.doc-collab button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.doc-collab .participants button {
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+/* La barre d'appel devient une carte claire, comme le reste de l'app. */
+.doc-collab .barre-appel {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 30px rgb(15 23 42 / 15%);
+}
+

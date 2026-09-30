@@ -1,15 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
-import { Room } from './components/Room.jsx';
 import { CreateDocumentModal } from './components/documents/CreateDocumentModal.jsx';
 import { CreateFolderModal } from './components/folders/CreateFolderModal.jsx';
 import { Header } from './components/layout/Header.jsx';
 import { Sidebar } from './components/layout/Sidebar.jsx';
-import { TwoFactorSetup } from './components/TwoFactorSetup.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { useDocuments } from './hooks/useDocuments.js';
 import { useFolders } from './hooks/useFolders.js';
-import { socket } from './lib/socket.js';
 import { DashboardPage } from './pages/DashboardPage.jsx';
 import { DocumentPage } from './pages/DocumentPage.jsx';
 import { FolderPage } from './pages/FolderPage.jsx';
@@ -26,7 +23,7 @@ const AUTH_VIEWS = {
 };
 
 function AuthenticationGate({ children }) {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const [view, setView] = useState(AUTH_VIEWS.LOGIN);
 
@@ -35,22 +32,8 @@ function AuthenticationGate({ children }) {
   }
 
   if (isAuthenticated) {
-    if (!user?.two_factor_enabled) {
-      return (
-        <div className="auth-screen">
-          <div className="auth-card">
-            <div className="auth-head">
-              <h2>Sécurise ton compte</h2>
-              <p className="auth-subtitle">
-                Active la double authentification pour accéder à tes documents.
-              </p>
-            </div>
-            <TwoFactorSetup isEnabled={false} />
-          </div>
-        </div>
-      );
-    }
-
+    // La double authentification est optionnelle : elle s'active / se desactive
+    // depuis la page profil. On ne force plus sa configuration a l'entree.
     return children;
   }
 
@@ -80,20 +63,6 @@ function AuthenticationGate({ children }) {
       onTwoFactorRequired={() => setView(AUTH_VIEWS.TWO_FACTOR)}
     />
   );
-}
-
-function RealtimeRoomPage() {
-  const { user } = useAuth();
-  const pseudo = user?.nom ?? user?.email ?? 'Utilisateur';
-
-  useEffect(() => {
-    socket.connect();
-    socket.emit('join', pseudo);
-
-    return () => socket.disconnect();
-  }, [pseudo]);
-
-  return <Room pseudo={pseudo} />;
 }
 
 function WorkspaceApp() {
@@ -215,7 +184,6 @@ function WorkspaceApp() {
             )
           }
         />
-        <Route path="/room" element={<RealtimeRoomPage />} />
       </Routes>
 
       {isCreateModalOpen && (

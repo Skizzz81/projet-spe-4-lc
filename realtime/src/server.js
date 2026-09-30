@@ -58,6 +58,57 @@ async function getDocumentAccess(socket, documentId) {
   return allowedAccess.includes(data.access) ? data.access : null;
 }
 
+function getPresenceRoom(documentId) {
+  return `presence:${documentId}`;
+}
+
+function getCallRoom(documentId) {
+  return `call:${documentId}`;
+}
+
+// Recupere le vrai compte connecte via le cookie (meme principe que getDocumentAccess).
+async function getCurrentUser(socket) {
+  const cookie = socket.handshake.headers.cookie;
+
+  if (!cookie) return null;
+
+  try {
+    const response = await fetch(`${apiUrl}/api/auth/profile`, {
+      headers: { cookie },
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    return data.user ?? null;
+  } catch {
+    // API injoignable (ex: en plein redemarrage) : on n'a pas l'identite, tant pis.
+    return null;
+  }
+}
+
+// Liste des personnes presentes sur un document, dedupliquee par compte.
+async function listPresence(documentId, excludeSocketId) {
+  const sockets = await io.in(getPresenceRoom(documentId)).fetchSockets();
+  const parUtilisateur = new Map();
+
+  for (const presentSocket of sockets) {
+    if (presentSocket.id === excludeSocketId) continue;
+
+    const utilisateur = presentSocket.data.user;
+    if (!utilisateur) continue;
+
+    parUtilisateur.set(utilisateur.id, {
+      userId: utilisateur.id,
+      nom: utilisateur.nom,
+      email: utilisateur.email,
+      socketId: presentSocket.id,
+    });
+  }
+
+  return [...parUtilisateur.values()];
+}
+
 io.on('connection', (socket) => {
   socket.data.documentAccess = new Map();
   console.log(`Connexion temps réel : ${socket.id}`);
@@ -123,24 +174,34 @@ io.on('connection', (socket) => {
     socket.to(room).emit('document:updated', { documentId, content });
   });
 
-  socket.on('chat:message', (text) => {
-    const contenu = String(text ?? '').trim();
+  socket.on('chat:message', (payload) => {
+    // Deux formes : une chaine (chat global de /room) ou { documentId, text } (chat d'un document).
+    const scoped = payload && typeof payload === 'object';
+    const contenu = String((scoped ? payload.text : payload) ?? '').trim();
     if (!contenu) return;
 
-    io.to(ROOM).emit('chat:message', {
+    const message = {
       id: `${socket.id}-${Date.now()}`,
       fromId: socket.id,
-      from: pseudos.get(socket.id) ?? 'Anonyme',
+      from: socket.data.user?.nom ?? pseudos.get(socket.id) ?? 'Anonyme',
       text: contenu,
       at: Date.now(),
-    });
+    };
+
+    if (scoped) {
+      const room = getPresenceRoom(Number(payload.documentId));
+      if (!socket.rooms.has(room)) return; // on n'envoie qu'aux gens du meme document
+      io.to(room).emit('chat:message', message);
+    } else {
+      io.to(ROOM).emit('chat:message', message);
+    }
   });
 
   // --- Signalisation WebRTC (le serveur ne fait que relayer, l'audio est en pair a pair) ---
   socket.on('call:offer', ({ to, sdp }) => {
     io.to(to).emit('call:offer', {
       from: socket.id,
-      fromPseudo: pseudos.get(socket.id) ?? 'Anonyme',
+      fromPseudo: socket.data.user?.nom ?? pseudos.get(socket.id) ?? 'Anonyme',
       sdp,
     });
   });
@@ -155,6 +216,74 @@ io.on('connection', (socket) => {
 
   socket.on('call:hangup', ({ to }) => {
     io.to(to).emit('call:hangup', { from: socket.id });
+  });
+
+  // --- Appel de groupe (mesh) : chaque participant se connecte a tous les autres ---
+  socket.on('call:join', async (documentId) => {
+    try {
+      const id = Number(documentId);
+      if (!Number.isInteger(id) || id <= 0) return;
+
+      if (!socket.data.user) {
+        socket.data.user = await getCurrentUser(socket);
+      }
+
+      const room = getCallRoom(id);
+      const autres = await io.in(room).fetchSockets();
+      // Le nouveau venu recoit la liste des gens deja en appel : c'est lui qui les appelle.
+      const peers = autres
+        .filter((s) => s.id !== socket.id)
+        .map((s) => ({ socketId: s.id, nom: s.data.user?.nom ?? 'Anonyme' }));
+
+      socket.join(room);
+      socket.emit('call:peers', peers);
+    } catch (error) {
+      console.error('call:join a échoué :', error.message);
+    }
+  });
+
+  socket.on('call:leave', (documentId) => {
+    const id = Number(documentId);
+    if (!Number.isInteger(id) || id <= 0) return;
+
+    const room = getCallRoom(id);
+    socket.to(room).emit('call:peer-left', { from: socket.id });
+    socket.leave(room);
+  });
+
+  // Presence par document, basee sur le vrai compte (corrige le "je me vois moi-meme").
+  socket.on('presence:sync', async (documentId) => {
+    try {
+      const id = Number(documentId);
+      if (!Number.isInteger(id) || id <= 0) return;
+
+      if (!socket.data.user) {
+        socket.data.user = await getCurrentUser(socket);
+      }
+      if (!socket.data.user) return;
+
+      socket.join(getPresenceRoom(id));
+      io.to(getPresenceRoom(id)).emit('presence:list', await listPresence(id));
+    } catch (error) {
+      console.error('presence:sync a échoué :', error.message);
+    }
+  });
+
+  // Au depart, on met a jour la liste des documents ou la personne etait presente.
+  socket.on('disconnecting', async () => {
+    try {
+      for (const room of socket.rooms) {
+        if (room.startsWith('presence:')) {
+          const id = Number(room.slice('presence:'.length));
+          socket.to(room).emit('presence:list', await listPresence(id, socket.id));
+        } else if (room.startsWith('call:')) {
+          // On previent les autres participants de l'appel que la personne part.
+          socket.to(room).emit('call:peer-left', { from: socket.id });
+        }
+      }
+    } catch (error) {
+      console.error('Nettoyage à la déconnexion a échoué :', error.message);
+    }
   });
 
   socket.on('disconnect', () => {
