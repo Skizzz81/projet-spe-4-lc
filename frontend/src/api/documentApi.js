@@ -26,9 +26,9 @@ export function listDocuments() {
   return request();
 }
 
-export function createDocument(title) {
+export function createDocument(title, folderId = null) {
   // POST /api/documents
-  return request('', { method: 'POST', body: { title } });
+  return request('', { method: 'POST', body: { title, folderId } });
 }
 
 export function updateDocument(documentId, updates) {

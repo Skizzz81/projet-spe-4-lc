@@ -6,7 +6,7 @@ const navigationItems = [
   { label: 'Partagés avec moi', symbol: '♧', to: '/shared' },
 ];
 
-export function Sidebar({ onCreateDocument, onUploadFile }) {
+export function Sidebar({ onCreateDocument, onUploadFile, onCreateFolder }) {
   const { user } = useAuth();
   const items = user?.role === 'admin'
     ? [...navigationItems, { label: 'Administration', symbol: '⚙', to: '/admin' }]
@@ -29,6 +29,17 @@ export function Sidebar({ onCreateDocument, onUploadFile }) {
         <span aria-hidden="true">+</span>
         Nouveau document
       </button>
+
+      {onCreateFolder && (
+        <button
+          className="new-folder-button"
+          type="button"
+          onClick={onCreateFolder}
+        >
+          <span aria-hidden="true">+</span>
+          Nouveau dossier
+        </button>
+      )}
 
       <label className="upload-document-button">
         <span aria-hidden="true">⭳</span>

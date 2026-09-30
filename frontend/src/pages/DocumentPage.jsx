@@ -22,6 +22,11 @@ export function DocumentPage({
   const [isInviting, setIsInviting] = useState(false);
   const document = documents.find((item) => String(item.id) === documentId);
   const activeDocumentId = document?.id;
+  let backPath = '/shared';
+
+  if (document?.access === 'owner') {
+    backPath = document.folderId ? `/folders/${document.folderId}` : '/';
+  }
 
   useEffect(() => {
     if (!activeDocumentId) return undefined;
@@ -57,7 +62,7 @@ export function DocumentPage({
     }
 
     await onDelete(document.id);
-    navigate('/');
+    navigate(backPath);
   }
 
   async function handleInvite(event) {
@@ -99,7 +104,6 @@ export function DocumentPage({
 
   const isOwner = document.access === 'owner';
   const canEdit = isOwner || document.access === 'editor';
-  const backPath = isOwner ? '/' : '/shared';
 
   return (
     <main className="document-page">

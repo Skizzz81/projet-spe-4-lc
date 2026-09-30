@@ -11,6 +11,7 @@ import {
   replaceDocumentFile,
   updateDocumentContent,
 } from '../repositories/documentRepository.js';
+import { findFolderByIdAndOwner } from '../repositories/folderRepository.js';
 
 // Un document fichier arrive en base64 dans du JSON (pas de multer, plus simple).
 function decodeFilePayload(body) {
@@ -63,7 +64,23 @@ export async function createDocument(req, res, next) {
       return res.status(400).json({ message: 'Le titre est obligatoire' });
     }
 
-    const documentId = await insertDocument(req.user.id, title);
+    let folderId = null;
+
+    if (req.body.folderId !== undefined && req.body.folderId !== null) {
+      folderId = Number(req.body.folderId);
+
+      if (!Number.isInteger(folderId) || folderId <= 0) {
+        return res.status(400).json({ message: 'Dossier invalide' });
+      }
+
+      const folder = await findFolderByIdAndOwner(folderId, req.user.id);
+
+      if (!folder) {
+        return res.status(404).json({ message: 'Dossier introuvable' });
+      }
+    }
+
+    const documentId = await insertDocument(req.user.id, title, folderId);
 
     res.status(201).json({
       document: {
@@ -72,6 +89,7 @@ export async function createDocument(req, res, next) {
         content: '',
         type: 'text',
         ownerId: req.user.id,
+        folderId,
         access: 'owner',
         lastModifiedBy: 'Vous',
         updatedAt: new Date(),
