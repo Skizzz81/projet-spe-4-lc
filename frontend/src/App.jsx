@@ -2,14 +2,17 @@ import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { Room } from './components/Room.jsx';
 import { CreateDocumentModal } from './components/documents/CreateDocumentModal.jsx';
+import { CreateFolderModal } from './components/folders/CreateFolderModal.jsx';
 import { Header } from './components/layout/Header.jsx';
 import { Sidebar } from './components/layout/Sidebar.jsx';
 import { TwoFactorSetup } from './components/TwoFactorSetup.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { useDocuments } from './hooks/useDocuments.js';
+import { useFolders } from './hooks/useFolders.js';
 import { socket } from './lib/socket.js';
 import { DashboardPage } from './pages/DashboardPage.jsx';
 import { DocumentPage } from './pages/DocumentPage.jsx';
+import { FolderPage } from './pages/FolderPage.jsx';
 import { AdminPage } from './pages/AdminPage.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
@@ -97,6 +100,8 @@ function WorkspaceApp() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
+  const [documentFolderId, setDocumentFolderId] = useState(null);
   const {
     documents,
     createDocument,
@@ -105,13 +110,25 @@ function WorkspaceApp() {
     inviteDocumentMember,
     applyRemoteDocumentContent,
   } = useDocuments();
+  const { folders, isLoadingFolders, createFolder } = useFolders();
   const ownedDocuments = documents.filter((document) => document.access === 'owner');
+  const rootDocuments = ownedDocuments.filter((document) => document.folderId === null);
   const sharedDocuments = documents.filter((document) => document.access !== 'owner');
 
   async function handleCreateDocument(title) {
-    await createDocument(title);
+    await createDocument(title, documentFolderId);
     setIsCreateModalOpen(false);
-    navigate('/');
+    navigate(documentFolderId ? `/folders/${documentFolderId}` : '/');
+  }
+
+  async function handleCreateFolder(name) {
+    await createFolder(name);
+    setIsCreateFolderModalOpen(false);
+  }
+
+  function openCreateDocument(folderId = null) {
+    setDocumentFolderId(folderId);
+    setIsCreateModalOpen(true);
   }
 
   return (
@@ -121,15 +138,20 @@ function WorkspaceApp() {
           path="/"
           element={
             <div className="app-shell">
-              <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+              <Sidebar
+                onCreateDocument={() => openCreateDocument()}
+                onCreateFolder={() => setIsCreateFolderModalOpen(true)}
+              />
 
               <div className="workspace">
                 <Header />
                 <DashboardPage
-                  documents={ownedDocuments}
+                  documents={rootDocuments}
+                  folders={folders}
                   title="Mes documents"
                   description="Retrouve ici les documents dont tu es propriétaire."
                   sectionTitle="Tous les documents"
+                  showFolders
                 />
               </div>
             </div>
@@ -139,7 +161,7 @@ function WorkspaceApp() {
           path="/shared"
           element={
             <div className="app-shell">
-              <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+              <Sidebar onCreateDocument={() => openCreateDocument()} />
 
               <div className="workspace">
                 <Header />
@@ -151,6 +173,17 @@ function WorkspaceApp() {
                 />
               </div>
             </div>
+          }
+        />
+        <Route
+          path="/folders/:folderId"
+          element={
+            <FolderPage
+              documents={documents}
+              folders={folders}
+              isLoadingFolders={isLoadingFolders}
+              onCreateDocument={openCreateDocument}
+            />
           }
         />
         <Route
@@ -171,7 +204,7 @@ function WorkspaceApp() {
           element={
             user?.role === 'admin' ? (
               <div className="app-shell">
-                <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+                <Sidebar onCreateDocument={() => openCreateDocument()} />
                 <div className="workspace">
                   <Header />
                   <AdminPage />
@@ -189,6 +222,13 @@ function WorkspaceApp() {
         <CreateDocumentModal
           onCancel={() => setIsCreateModalOpen(false)}
           onCreate={handleCreateDocument}
+        />
+      )}
+
+      {isCreateFolderModalOpen && (
+        <CreateFolderModal
+          onCancel={() => setIsCreateFolderModalOpen(false)}
+          onCreate={handleCreateFolder}
         />
       )}
     </>

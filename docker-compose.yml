@@ -71,6 +71,7 @@ services:
     environment:
       CHOKIDAR_USEPOLLING: 'true'
       VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+      VITE_REALTIME_URL: ${VITE_REALTIME_URL:-http://localhost:3001}
     ports:
       - '${FRONTEND_PORT:-5173}:5173'
     volumes:
