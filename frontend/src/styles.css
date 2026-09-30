@@ -462,7 +462,7 @@ button {
 }
 
 .document-page {
-  width: min(100% - 2rem, 70rem);
+  width: min(100% - 2rem, 110rem);
   margin: 0 auto;
   padding: 2rem 0;
 }
@@ -565,7 +565,7 @@ button {
 }
 
 .document-editor {
-  min-height: 32rem;
+  min-height: max(34rem, 68vh);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 0.875rem;
@@ -576,7 +576,7 @@ button {
 .document-editor-textarea {
   display: block;
   width: 100%;
-  min-height: 32rem;
+  min-height: max(34rem, 68vh);
   padding: 2rem;
   color: var(--color-text);
   font: inherit;
@@ -912,22 +912,43 @@ button {
 }
 
 .message {
-  display: flex;
-  flex-direction: column;
-  max-width: 80%;
-  background: #f3f4f6;
-  border-radius: 0.5rem;
-  padding: 0.4rem 0.6rem;
+  max-width: 88%;
+  padding: 0.45rem 0.7rem;
+  color: var(--color-text);
+  background: #f1f5f9;
+  border-radius: 1rem;
+  word-break: break-word;
 }
 
 .message.moi {
   align-self: flex-end;
-  background: #dbeafe;
+  color: #fff;
+  background: var(--color-primary);
+  border-bottom-right-radius: 0.3rem;
+}
+
+.message:not(.moi) {
+  align-self: flex-start;
+  border-bottom-left-radius: 0.3rem;
 }
 
 .message .auteur {
+  display: block;
+  margin-bottom: 0.1rem;
+  color: var(--color-text-muted);
   font-size: 0.72rem;
-  color: #6b7280;
+  font-weight: 600;
+}
+
+.message .texte {
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.chat-empty {
+  margin: auto;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
 }
 
 .barre-message {
@@ -1365,7 +1386,8 @@ button {
 /* Espace de travail : appels/invite a gauche, document au centre, chat a droite. */
 .doc-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 19rem) minmax(0, 1fr) minmax(0, 22rem);
+  /* L'ecran est divise en 6 : 1 pour l'appel, 4 pour le document, 1 pour le chat. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 4fr) minmax(0, 1fr);
   gap: 1.25rem;
   align-items: start;
   margin-top: 1.5rem;
@@ -1432,7 +1454,13 @@ button {
 /* Commandes de l'appel de groupe */
 .call-join {
   width: 100%;
-  margin-bottom: 0.75rem;
+}
+
+.call-hint {
+  margin: 0.5rem 0 0.75rem;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .call-controls {
@@ -1495,7 +1523,7 @@ button {
 }
 
 .doc-collab .chat {
-  height: 30rem;
+  height: max(34rem, 68vh);
 }
 
 .doc-collab .participants h3,
@@ -1512,16 +1540,28 @@ button {
   border-top: 0;
 }
 
-.doc-collab .message {
-  background: #f3f4f6;
+/* Bouton d'envoi du chat : une petite icone, pas un gros bouton texte. */
+.doc-collab .chat-send {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-height: 0;
+  padding: 0;
+  color: #fff;
+  background: var(--color-primary);
+  border: 0;
+  border-radius: 0.6rem;
 }
 
-.doc-collab .message.moi {
-  background: var(--color-primary-soft);
+.doc-collab .chat-send:hover:not(:disabled) {
+  background: var(--color-primary-hover);
 }
 
-.doc-collab .message .auteur {
-  color: var(--color-text-muted);
+.doc-collab .chat-send:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .doc-collab input {

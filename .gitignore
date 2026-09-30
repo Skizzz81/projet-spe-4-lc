@@ -9,3 +9,6 @@ coverage/
 .idea/
 .vscode/
 
+# Artefacts de tests locaux (captures et traces Playwright), a ne jamais commiter
+.playwright-mcp/
+

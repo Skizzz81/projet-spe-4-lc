@@ -109,6 +109,14 @@ async function listPresence(documentId, excludeSocketId) {
   return [...parUtilisateur.values()];
 }
 
+// Liste des personnes actuellement dans l'appel d'un document (une entree par connexion).
+async function listCall(documentId, excludeSocketId) {
+  const sockets = await io.in(getCallRoom(documentId)).fetchSockets();
+  return sockets
+    .filter((s) => s.id !== excludeSocketId)
+    .map((s) => ({ socketId: s.id, nom: s.data.user?.nom ?? 'Anonyme' }));
+}
+
 io.on('connection', (socket) => {
   socket.data.documentAccess = new Map();
   console.log(`Connexion temps réel : ${socket.id}`);
@@ -237,18 +245,21 @@ io.on('connection', (socket) => {
 
       socket.join(room);
       socket.emit('call:peers', peers);
+      // Tout le monde sur le document voit qui est dans l'appel (pour pouvoir rejoindre).
+      io.to(getPresenceRoom(id)).emit('call:roster', await listCall(id));
     } catch (error) {
       console.error('call:join a échoué :', error.message);
     }
   });
 
-  socket.on('call:leave', (documentId) => {
+  socket.on('call:leave', async (documentId) => {
     const id = Number(documentId);
     if (!Number.isInteger(id) || id <= 0) return;
 
     const room = getCallRoom(id);
     socket.to(room).emit('call:peer-left', { from: socket.id });
     socket.leave(room);
+    io.to(getPresenceRoom(id)).emit('call:roster', await listCall(id));
   });
 
   // Presence par document, basee sur le vrai compte (corrige le "je me vois moi-meme").
@@ -264,6 +275,8 @@ io.on('connection', (socket) => {
 
       socket.join(getPresenceRoom(id));
       io.to(getPresenceRoom(id)).emit('presence:list', await listPresence(id));
+      // On informe le nouveau venu s'il y a deja un appel en cours sur le document.
+      socket.emit('call:roster', await listCall(id));
     } catch (error) {
       console.error('presence:sync a échoué :', error.message);
     }
@@ -278,7 +291,9 @@ io.on('connection', (socket) => {
           socket.to(room).emit('presence:list', await listPresence(id, socket.id));
         } else if (room.startsWith('call:')) {
           // On previent les autres participants de l'appel que la personne part.
+          const id = Number(room.slice('call:'.length));
           socket.to(room).emit('call:peer-left', { from: socket.id });
+          socket.to(getPresenceRoom(id)).emit('call:roster', await listCall(id, socket.id));
         }
       }
     } catch (error) {

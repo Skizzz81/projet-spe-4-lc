@@ -13,8 +13,10 @@ const rtcConfig = {
 export function useVoiceCall(documentId) {
   const [inCall, setInCall] = useState(false);
   const [muted, setMuted] = useState(false);
-  // Un participant distant : { socketId, nom, stream }
+  // Un participant distant auquel je suis connecte : { socketId, nom, stream }
   const [participants, setParticipants] = useState([]);
+  // Qui est dans l'appel du document (envoye par le serveur a tout le monde).
+  const [roster, setRoster] = useState([]);
 
   const peersRef = useRef(new Map()); // socketId -> RTCPeerConnection
   const localStreamRef = useRef(null);
@@ -157,11 +159,16 @@ export function useVoiceCall(documentId) {
       closePeer(from);
     }
 
+    function onRoster(liste) {
+      setRoster(liste);
+    }
+
     socket.on('call:peers', onPeers);
     socket.on('call:offer', onOffer);
     socket.on('call:answer', onAnswer);
     socket.on('call:ice', onIce);
     socket.on('call:peer-left', onPeerLeft);
+    socket.on('call:roster', onRoster);
 
     return () => {
       socket.off('call:peers', onPeers);
@@ -169,8 +176,9 @@ export function useVoiceCall(documentId) {
       socket.off('call:answer', onAnswer);
       socket.off('call:ice', onIce);
       socket.off('call:peer-left', onPeerLeft);
+      socket.off('call:roster', onRoster);
     };
   }, [createPeer, closePeer]);
 
-  return { inCall, muted, participants, joinCall, leaveCall, toggleMute };
+  return { inCall, muted, participants, roster, joinCall, leaveCall, toggleMute };
 }
