@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentEditor } from '../components/editor/DocumentEditor.jsx';
+import { DocumentCollaboration } from '../components/DocumentCollaboration.jsx';
 import { socket } from '../lib/socket.js';
 
 export function DocumentPage({
@@ -150,6 +151,8 @@ export function DocumentPage({
         onChange={handleContentChange}
         readOnly={!canEdit}
       />
+
+      <DocumentCollaboration />
     </main>
   );
 }
