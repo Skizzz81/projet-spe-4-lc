@@ -20,10 +20,18 @@ export function DocumentCollaboration({ documentId }) {
       setParticipants(liste);
     }
 
-    socket.on('presence:list', onList);
-    socket.emit('presence:sync', documentId);
+    function sync() {
+      socket.emit('presence:sync', documentId);
+    }
 
-    return () => socket.off('presence:list', onList);
+    socket.on('presence:list', onList);
+    socket.on('connect', sync);
+    sync(); // au cas ou le socket est deja connecte
+
+    return () => {
+      socket.off('presence:list', onList);
+      socket.off('connect', sync);
+    };
   }, [documentId]);
 
   // Les autres presents (tout le monde sauf mon propre compte).
