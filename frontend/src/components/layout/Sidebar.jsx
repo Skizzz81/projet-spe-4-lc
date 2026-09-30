@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 const navigationItems = [
   { label: 'Mes documents', symbol: '▤', to: '/' },
@@ -6,6 +7,11 @@ const navigationItems = [
 ];
 
 export function Sidebar({ onCreateDocument }) {
+  const { user } = useAuth();
+  const items = user?.role === 'admin'
+    ? [...navigationItems, { label: 'Administration', symbol: '⚙', to: '/admin' }]
+    : navigationItems;
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -25,7 +31,7 @@ export function Sidebar({ onCreateDocument }) {
       </button>
 
       <nav className="sidebar-navigation" aria-label="Navigation principale">
-        {navigationItems.map((item) => (
+        {items.map((item) => (
           <NavLink
             className={({ isActive }) =>
               `navigation-item${isActive ? ' active' : ''}`

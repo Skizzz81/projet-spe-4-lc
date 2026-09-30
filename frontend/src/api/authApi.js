@@ -11,7 +11,7 @@ async function request(path, options = {}) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(data.message ?? "Une erreur est survenue");
+    throw new Error(data.message ?? data.errors?.[0]?.msg ?? "Une erreur est survenue");
   }
 
   return data;
@@ -35,6 +35,10 @@ export function logout() {
 
 export function getProfile() {
   return request('/profile');
+}
+
+export function updateProfile({ nom, email }) {
+  return request('/profile', { method: 'PATCH', body: { nom, email } });
 }
 
 export function setup2fa() {

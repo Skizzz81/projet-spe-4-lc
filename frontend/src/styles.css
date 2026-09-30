@@ -1174,3 +1174,93 @@ button {
 .profile-logout:hover {
   background: #fef2f2;
 }
+
+.admin-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.admin-panel {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+  padding: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+}
+
+.admin-panel h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.admin-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-create-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  align-items: end;
+  gap: 1rem;
+}
+
+.admin-create-form .form-field select,
+.admin-role-select {
+  min-height: 2.875rem;
+  padding: 0.65rem 0.75rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.625rem;
+}
+
+.admin-create-form .primary-button {
+  min-height: 2.875rem;
+}
+
+.admin-message {
+  margin: 0;
+  color: #15803d;
+}
+
+.admin-table-wrap {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.admin-users-table {
+  width: 100%;
+  min-width: 48rem;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-users-table th,
+.admin-users-table td {
+  padding: 0.875rem 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.admin-users-table th {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+.admin-user-email {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.admin-users-table button:disabled,
+.admin-role-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

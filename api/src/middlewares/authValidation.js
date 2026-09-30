@@ -45,4 +45,21 @@ const validateLogin = [
         .withMessage("Le mot de passe est obligatoire")
 ];
 
-export { validateRegister, validateLogin, handleValidationErrors };
+const validateProfileUpdate = [
+    body("nom")
+        .trim()
+        .notEmpty()
+        .withMessage("Le nom est obligatoire")
+        .isLength({ min: 2, max: 100 })
+        .withMessage("Le nom doit contenir entre 2 et 100 caractères"),
+
+    body("email")
+        .trim()
+        .notEmpty()
+        .withMessage("L'email est obligatoire")
+        .isEmail()
+        .withMessage("L'email doit être valide")
+        .normalizeEmail()
+];
+
+export { validateRegister, validateLogin, validateProfileUpdate, handleValidationErrors };

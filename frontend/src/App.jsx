@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { Room } from './components/Room.jsx';
 import { CreateDocumentModal } from './components/documents/CreateDocumentModal.jsx';
 import { Header } from './components/layout/Header.jsx';
@@ -10,6 +10,7 @@ import { useDocuments } from './hooks/useDocuments.js';
 import { socket } from './lib/socket.js';
 import { DashboardPage } from './pages/DashboardPage.jsx';
 import { DocumentPage } from './pages/DocumentPage.jsx';
+import { AdminPage } from './pages/AdminPage.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
 import { RegisterPage } from './pages/RegisterPage.jsx';
@@ -94,6 +95,7 @@ function RealtimeRoomPage() {
 
 function WorkspaceApp() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const {
     documents,
@@ -164,6 +166,22 @@ function WorkspaceApp() {
           }
         />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/admin"
+          element={
+            user?.role === 'admin' ? (
+              <div className="app-shell">
+                <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+                <div className="workspace">
+                  <Header />
+                  <AdminPage />
+                </div>
+              </div>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
         <Route path="/room" element={<RealtimeRoomPage />} />
       </Routes>
 

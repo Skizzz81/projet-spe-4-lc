@@ -266,4 +266,28 @@ const getProfile = async (req, res, next) => {
     }
 };
 
-export { register, login, logout, verifyLogin2fa, setup2fa, enable2fa, disable2fa, getProfile };
+const updateProfile = async (req, res, next) => {
+    try {
+        const { nom, email } = req.body;
+        await database.query("update users set nom = ?, email = ? where id = ?", [nom, email, req.user.id]);
+
+        const [results] = await database.query(
+            "select id, nom, email, role, two_factor_enabled from users where id = ?",
+            [req.user.id]
+        );
+
+        res.json({
+            message: "Profil mis à jour",
+            user: results[0]
+        });
+    } catch (error) {
+        if (error.code === "ER_DUP_ENTRY") {
+            return res.status(409).json({
+                message: "Cette adresse email est déjà utilisée"
+            });
+        }
+        next(error);
+    }
+};
+
+export { register, login, logout, verifyLogin2fa, setup2fa, enable2fa, disable2fa, getProfile, updateProfile };
