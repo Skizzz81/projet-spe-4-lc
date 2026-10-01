@@ -1272,15 +1272,49 @@ button {
   border-top: 1px solid var(--color-border);
 }
 
-.doc-collab > h2 {
-  margin: 0 0 1rem;
-  font-size: 1.125rem;
+.collab-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
 }
 
-.doc-collab .colonnes {
-  grid-template-columns: 16rem 1fr;
+.collab-left {
+  display: grid;
   gap: 1.25rem;
-  margin-top: 0;
+  min-width: 0;
+}
+
+.collab-right {
+  min-width: 0;
+}
+
+/* L'invitation est deja une carte, on retire sa marge dans la colonne. */
+.collab-left .invite-section {
+  margin-bottom: 0;
+}
+
+/* Barre de recherche des participants a appeler. */
+.participant-search {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.participant-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.participant-name {
+  font-weight: 600;
+}
+
+.participant-email {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
 }
 
 /* Les deux blocs prennent le meme style de carte que le reste de l'app. */
@@ -1369,8 +1403,8 @@ button {
   box-shadow: 0 10px 30px rgb(15 23 42 / 15%);
 }
 
-@media (max-width: 760px) {
-  .doc-collab .colonnes {
+@media (max-width: 860px) {
+  .collab-grid {
     grid-template-columns: 1fr;
   }
 }
