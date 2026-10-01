@@ -13,6 +13,15 @@ import {
 } from '../repositories/documentRepository.js';
 import { findFolderByIdAndOwner } from '../repositories/folderRepository.js';
 
+const ALLOWED_FILE_MIMES = new Set([
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+]);
+const MAX_FILE_SIZE = 20 * 1024 * 1024;
+
 // Un document fichier arrive en base64 dans du JSON (pas de multer, plus simple).
 function decodeFilePayload(body) {
   const fileName = body.fileName?.trim();
@@ -23,7 +32,17 @@ function decodeFilePayload(body) {
     return null;
   }
 
-  return { fileName, fileMime, buffer: Buffer.from(fileBase64, 'base64') };
+  if (!ALLOWED_FILE_MIMES.has(fileMime)) {
+    return null;
+  }
+
+  const buffer = Buffer.from(fileBase64, 'base64');
+
+  if (buffer.length === 0 || buffer.length > MAX_FILE_SIZE) {
+    return null;
+  }
+
+  return { fileName, fileMime, buffer };
 }
 
 export async function getDocumentAccess(req, res, next) {
@@ -253,6 +272,7 @@ export async function inviteDocumentMember(req, res, next) {
   try {
     const documentId = Number(req.params.documentId);
     const email = req.body.email?.trim().toLowerCase();
+    const permission = req.body.permission ?? 'editor';
 
     if (!Number.isInteger(documentId) || documentId <= 0) {
       return res.status(400).json({ message: 'Identifiant de document invalide' });
@@ -260,6 +280,10 @@ export async function inviteDocumentMember(req, res, next) {
 
     if (!email) {
       return res.status(400).json({ message: "L'adresse email est obligatoire" });
+    }
+
+    if (!['viewer', 'editor'].includes(permission)) {
+      return res.status(400).json({ message: 'Permission invalide' });
     }
 
     const ownsDocument = await isDocumentOwner(documentId, req.user.id);
@@ -278,11 +302,11 @@ export async function inviteDocumentMember(req, res, next) {
       return res.status(400).json({ message: 'Tu es déjà propriétaire de ce document' });
     }
 
-    await insertDocumentMember(documentId, invitedUser.id);
+    await insertDocumentMember(documentId, invitedUser.id, permission);
 
     res.status(201).json({
       message: `${invitedUser.nom} a été invité sur le document`,
-      member: invitedUser,
+      member: { ...invitedUser, permission },
     });
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {

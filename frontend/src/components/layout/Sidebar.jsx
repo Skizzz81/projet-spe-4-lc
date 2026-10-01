@@ -47,6 +47,7 @@ export function Sidebar({ onCreateDocument, onUploadFile, onCreateFolder }) {
           Importer un fichier
           <input
             type="file"
+            accept="application/pdf,image/png,image/jpeg,image/gif,image/webp"
             hidden
             onChange={(event) => {
               const file = event.target.files?.[0];

@@ -41,9 +41,12 @@ export function deleteDocument(documentId) {
   return request(`/${documentId}`, { method: 'DELETE' });
 }
 
-export function inviteDocumentMember(documentId, email) {
+export function inviteDocumentMember(documentId, email, permission) {
   // POST /api/documents/:documentId/members
-  return request(`/${documentId}/members`, { method: 'POST', body: { email } });
+  return request(`/${documentId}/members`, {
+    method: 'POST',
+    body: { email, permission },
+  });
 }
 
 // Lit un fichier et renvoie son contenu en base64 (sans le prefixe "data:...,").

@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import * as documentApi from '../../api/documentApi.js';
 
@@ -11,7 +12,10 @@ function DocumentIcon() {
   );
 }
 
-export function DocumentCard({ document }) {
+export function DocumentCard({ document, onDelete, onReplaceFile }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isReplacing, setIsReplacing] = useState(false);
+  const replacementInputRef = useRef(null);
   const updatedAt = new Intl.DateTimeFormat('fr-FR', {
     dateStyle: 'medium',
     timeStyle: 'short',
@@ -22,6 +26,50 @@ export function DocumentCard({ document }) {
     viewer: 'Lecture seule',
   };
   const isFile = document.type === 'file';
+  const displayTitle = isFile ? document.fileName || document.title : document.title;
+  const canDelete = document.access === 'owner' && Boolean(onDelete);
+  const canReplace =
+    isFile && ['owner', 'editor'].includes(document.access) && Boolean(onReplaceFile);
+
+  async function handleDeleteDocument() {
+    const isConfirmed = window.confirm(
+      `Voulez-vous vraiment supprimer « ${displayTitle} » ?`,
+    );
+
+    if (!isConfirmed) return;
+
+    setIsDeleting(true);
+
+    try {
+      await onDelete(document.id);
+    } catch (error) {
+      window.alert(error.message);
+      setIsDeleting(false);
+    }
+  }
+
+  async function handleReplaceFile(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) return;
+
+    const isConfirmed = window.confirm(
+      `Remplacer « ${displayTitle} » par « ${file.name} » ?`,
+    );
+
+    if (!isConfirmed) return;
+
+    setIsReplacing(true);
+
+    try {
+      await onReplaceFile(document.id, file);
+    } catch (error) {
+      window.alert(error.message);
+    } finally {
+      setIsReplacing(false);
+    }
+  }
 
   const content = (
     <>
@@ -35,7 +83,7 @@ export function DocumentCard({ document }) {
       </span>
 
       <span className="document-information">
-        <span className="document-title">{document.title}</span>
+        <span className="document-title">{displayTitle}</span>
         {isFile && <span className="document-type-badge">Fichier</span>}
         <span
           className="document-metadata"
@@ -50,24 +98,64 @@ export function DocumentCard({ document }) {
     </>
   );
 
-  // Un fichier s'ouvre directement dans le navigateur (nouvel onglet).
-  if (isFile) {
-    return (
-      <a
-        className="document-card"
-        href={documentApi.fileUrl(document.id)}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {content}
-      </a>
-    );
-  }
-
-  // Un document texte ouvre son espace d'edition collaborative.
-  return (
+  const card = isFile ? (
+    <a
+      className="document-card"
+      href={documentApi.fileUrl(document.id)}
+      target="_blank"
+      rel="noreferrer"
+    >
+      {content}
+    </a>
+  ) : (
     <Link className="document-card" to={`/documents/${document.id}`}>
       {content}
     </Link>
+  );
+
+  return (
+    <div className="document-card-wrapper">
+      {card}
+
+      {canReplace && (
+        <>
+          <button
+            className={`document-replace-button${canDelete ? '' : ' only-action'}`}
+            type="button"
+            aria-label={`Remplacer ${displayTitle}`}
+            title="Remplacer le fichier"
+            disabled={isReplacing}
+            onClick={() => replacementInputRef.current?.click()}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 12a8 8 0 1 1-2.34-5.66L20 8" />
+              <path d="M20 3v5h-5" />
+            </svg>
+          </button>
+          <input
+            ref={replacementInputRef}
+            type="file"
+            accept="application/pdf,image/png,image/jpeg,image/gif,image/webp"
+            hidden
+            onChange={handleReplaceFile}
+          />
+        </>
+      )}
+
+      {canDelete && (
+        <button
+          className="document-delete-button"
+          type="button"
+          aria-label={`Supprimer ${displayTitle}`}
+          title="Supprimer le document"
+          disabled={isDeleting}
+          onClick={handleDeleteDocument}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+      )}
+    </div>
   );
 }

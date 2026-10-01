@@ -86,8 +86,8 @@ export function useDocuments() {
     );
   }
 
-  function inviteDocumentMember(documentId, email) {
-    return documentApi.inviteDocumentMember(documentId, email);
+  function inviteDocumentMember(documentId, email, permission) {
+    return documentApi.inviteDocumentMember(documentId, email, permission);
   }
 
   const applyRemoteDocumentContent = useCallback((documentId, content) => {
