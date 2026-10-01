@@ -843,6 +843,7 @@ button {
 
 .barre-message input {
   flex: 1;
+  min-width: 0; /* laisse l'input retrecir pour que le bouton ne deborde pas */
 }
 
 /* --- Barre d'appel --- */
@@ -1289,6 +1290,11 @@ button {
 .collab-panel {
   display: grid;
   gap: 1.25rem;
+}
+
+/* Sans ca, les cartes gardent leur largeur de contenu et debordent sur l'editeur. */
+.collab-panel > * {
+  min-width: 0;
 }
 
 .collab-panel .invite-section {
