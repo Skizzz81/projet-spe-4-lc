@@ -68,14 +68,19 @@ async function getCurrentUser(socket) {
 
   if (!cookie) return null;
 
-  const response = await fetch(`${apiUrl}/api/auth/profile`, {
-    headers: { cookie },
-  });
+  try {
+    const response = await fetch(`${apiUrl}/api/auth/profile`, {
+      headers: { cookie },
+    });
 
-  if (!response.ok) return null;
+    if (!response.ok) return null;
 
-  const data = await response.json();
-  return data.user ?? null;
+    const data = await response.json();
+    return data.user ?? null;
+  } catch {
+    // API injoignable (ex: en plein redemarrage) : on n'a pas l'identite, tant pis.
+    return null;
+  }
 }
 
 // Liste des personnes presentes sur un document, dedupliquee par compte.
@@ -201,25 +206,33 @@ io.on('connection', (socket) => {
 
   // Presence par document, basee sur le vrai compte (corrige le "je me vois moi-meme").
   socket.on('presence:sync', async (documentId) => {
-    const id = Number(documentId);
-    if (!Number.isInteger(id) || id <= 0) return;
+    try {
+      const id = Number(documentId);
+      if (!Number.isInteger(id) || id <= 0) return;
 
-    if (!socket.data.user) {
-      socket.data.user = await getCurrentUser(socket);
+      if (!socket.data.user) {
+        socket.data.user = await getCurrentUser(socket);
+      }
+      if (!socket.data.user) return;
+
+      socket.join(getPresenceRoom(id));
+      io.to(getPresenceRoom(id)).emit('presence:list', await listPresence(id));
+    } catch (error) {
+      console.error('presence:sync a échoué :', error.message);
     }
-    if (!socket.data.user) return;
-
-    socket.join(getPresenceRoom(id));
-    io.to(getPresenceRoom(id)).emit('presence:list', await listPresence(id));
   });
 
   // Au depart, on met a jour la liste des documents ou la personne etait presente.
   socket.on('disconnecting', async () => {
-    const presenceRooms = [...socket.rooms].filter((room) => room.startsWith('presence:'));
+    try {
+      const presenceRooms = [...socket.rooms].filter((room) => room.startsWith('presence:'));
 
-    for (const room of presenceRooms) {
-      const id = Number(room.slice('presence:'.length));
-      socket.to(room).emit('presence:list', await listPresence(id, socket.id));
+      for (const room of presenceRooms) {
+        const id = Number(room.slice('presence:'.length));
+        socket.to(room).emit('presence:list', await listPresence(id, socket.id));
+      }
+    } catch (error) {
+      console.error('Nettoyage de présence à la déconnexion a échoué :', error.message);
     }
   });
 
