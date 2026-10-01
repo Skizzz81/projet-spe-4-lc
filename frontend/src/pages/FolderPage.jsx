@@ -9,6 +9,8 @@ export function FolderPage({
   isLoadingFolders,
   onCreateDocument,
   onUploadFile,
+  onDelete,
+  onReplaceFile,
 }) {
   const { folderId } = useParams();
   const currentFolderId = Number(folderId);
@@ -42,6 +44,8 @@ export function FolderPage({
           title={currentFolder.name}
           description="Documents contenus dans ce dossier."
           sectionTitle="Documents"
+          onDelete={onDelete}
+          onReplaceFile={onReplaceFile}
         />
       </div>
     </div>

@@ -10,6 +10,8 @@ export function DashboardPage({
   sectionTitle,
   showFolders = false,
   backTo,
+  onDelete,
+  onReplaceFile,
 }) {
   return (
     <main className="main-content">
@@ -51,7 +53,12 @@ export function DashboardPage({
 
         <div className="documents-grid">
           {documents.map((document) => (
-            <DocumentCard document={document} key={document.id} />
+            <DocumentCard
+              document={document}
+              key={document.id}
+              onDelete={onDelete}
+              onReplaceFile={onReplaceFile}
+            />
           ))}
         </div>
       </section>

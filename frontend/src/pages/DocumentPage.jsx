@@ -15,6 +15,7 @@ export function DocumentPage({
   const { documentId } = useParams();
   const navigate = useNavigate();
   const [inviteEmail, setInviteEmail] = useState('');
+  const [invitePermission, setInvitePermission] = useState('editor');
   const [inviteMessage, setInviteMessage] = useState('');
   const [inviteError, setInviteError] = useState('');
   const [isInviting, setIsInviting] = useState(false);
@@ -70,9 +71,10 @@ export function DocumentPage({
     setIsInviting(true);
 
     try {
-      const data = await onInvite(document.id, inviteEmail);
+      const data = await onInvite(document.id, inviteEmail, invitePermission);
       setInviteMessage(data.message);
       setInviteEmail('');
+      setInvitePermission('editor');
     } catch (error) {
       setInviteError(error.message);
     } finally {
@@ -140,6 +142,14 @@ export function DocumentPage({
                     placeholder="utilisateur@exemple.com"
                     required
                   />
+                  <select
+                    aria-label="Permission sur le document"
+                    value={invitePermission}
+                    onChange={(event) => setInvitePermission(event.target.value)}
+                  >
+                    <option value="editor">Peut modifier</option>
+                    <option value="viewer">Lecture seule</option>
+                  </select>
                   <button className="primary-button" type="submit" disabled={isInviting}>
                     {isInviting ? 'Invitation…' : 'Inviter'}
                   </button>

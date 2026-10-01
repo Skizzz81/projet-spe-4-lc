@@ -130,10 +130,10 @@ export async function isDocumentOwner(documentId, userId) {
   return documents.length > 0;
 }
 
-export async function insertDocumentMember(documentId, userId) {
+export async function insertDocumentMember(documentId, userId, permission) {
   await database.query(
     `INSERT INTO document_members (document_id, user_id, permission)
-     VALUES (?, ?, 'editor')`,
-    [documentId, userId],
+     VALUES (?, ?, ?)`,
+    [documentId, userId, permission],
   );
 }

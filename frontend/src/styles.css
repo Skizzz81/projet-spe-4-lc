@@ -381,6 +381,75 @@ button {
   outline-offset: 2px;
 }
 
+.document-card-wrapper {
+  position: relative;
+  min-width: 0;
+}
+
+.document-card-wrapper .document-card {
+  height: 100%;
+}
+
+.document-delete-button,
+.document-replace-button {
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 12%);
+  transform: translateY(-35%);
+}
+
+.document-delete-button {
+  right: 0;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  transform: translate(35%, -35%);
+}
+
+.document-replace-button {
+  right: 2.4rem;
+  color: var(--color-primary);
+  border: 1px solid #bfdbfe;
+}
+
+.document-replace-button.only-action {
+  right: 0;
+  transform: translate(35%, -35%);
+}
+
+.document-delete-button:hover:not(:disabled) {
+  color: #ffffff;
+  background: #b91c1c;
+}
+
+.document-replace-button:hover:not(:disabled) {
+  color: #ffffff;
+  background: var(--color-primary);
+}
+
+.document-delete-button svg,
+.document-replace-button svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.document-delete-button:disabled,
+.document-replace-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
 .document-preview {
   position: relative;
   display: flex;
@@ -539,16 +608,31 @@ button {
 }
 
 .invite-form > div {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.75rem;
 }
 
 .invite-form input {
-  flex: 1;
+  width: 100%;
   min-width: 0;
   padding: 0.625rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 0.625rem;
+}
+
+.invite-form select {
+  width: 100%;
+  min-height: 2.625rem;
+  padding: 0.625rem 0.75rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.625rem;
+}
+
+.invite-form .primary-button {
+  width: 100%;
 }
 
 .invite-success,

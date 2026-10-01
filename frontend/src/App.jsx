@@ -76,6 +76,7 @@ function WorkspaceApp() {
     documents,
     createDocument,
     uploadDocument,
+    replaceDocumentFile,
     updateDocumentContent,
     deleteDocument,
     inviteDocumentMember,
@@ -107,6 +108,10 @@ function WorkspaceApp() {
     await uploadDocument(file.name, file, folderId);
   }
 
+  function handleReplaceFile(documentId, file) {
+    return replaceDocumentFile(documentId, file);
+  }
+
   return (
     <>
       <Routes>
@@ -129,6 +134,8 @@ function WorkspaceApp() {
                   description="Retrouve ici les documents dont tu es propriétaire."
                   sectionTitle="Tous les documents"
                   showFolders
+                  onDelete={deleteDocument}
+                  onReplaceFile={handleReplaceFile}
                 />
               </div>
             </div>
@@ -150,6 +157,7 @@ function WorkspaceApp() {
                   title="Partagés avec moi"
                   description="Retrouve ici les documents sur lesquels tu as été invité."
                   sectionTitle="Documents partagés"
+                  onReplaceFile={handleReplaceFile}
                 />
               </div>
             </div>
@@ -164,6 +172,8 @@ function WorkspaceApp() {
               isLoadingFolders={isLoadingFolders}
               onCreateDocument={openCreateDocument}
               onUploadFile={handleUploadFile}
+              onDelete={deleteDocument}
+              onReplaceFile={handleReplaceFile}
             />
           }
         />
