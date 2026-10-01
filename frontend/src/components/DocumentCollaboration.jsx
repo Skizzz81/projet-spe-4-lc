@@ -8,6 +8,7 @@ import { useVoiceCall } from '../lib/useVoiceCall.js';
 export function DocumentCollaboration({ documentId, children }) {
   const { user } = useAuth();
   const monId = user?.id;
+  const pseudo = user?.nom ?? user?.email ?? 'Utilisateur';
   const [participants, setParticipants] = useState([]);
   const [recherche, setRecherche] = useState('');
   const { call, muted, remoteAudioRef, startCall, acceptCall, hangup, toggleMute } =
@@ -21,6 +22,8 @@ export function DocumentCollaboration({ documentId, children }) {
     }
 
     function sync() {
+      // 'join' pour le chat (room globale), 'presence:sync' pour la liste d'appel par document.
+      socket.emit('join', pseudo);
       socket.emit('presence:sync', documentId);
     }
 
@@ -32,7 +35,7 @@ export function DocumentCollaboration({ documentId, children }) {
       socket.off('presence:list', onList);
       socket.off('connect', sync);
     };
-  }, [documentId]);
+  }, [documentId, pseudo]);
 
   // Les autres presents (tout le monde sauf mon compte), filtres par la recherche.
   const q = recherche.trim().toLowerCase();
