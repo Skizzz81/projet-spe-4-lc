@@ -1266,32 +1266,43 @@ button {
 }
 
 /* --- Panneau appel + messagerie dans la page document --- */
-.doc-collab {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--color-border);
-}
-
-.collab-grid {
+/* Espace de travail : appels/invite a gauche, document au centre, chat a droite. */
+.doc-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 19rem) minmax(0, 1fr) minmax(0, 22rem);
   gap: 1.25rem;
   align-items: start;
+  margin-top: 1.5rem;
 }
 
-.collab-left {
+.doc-workspace > * {
+  min-width: 0;
+}
+
+/* Les panneaux lateraux restent visibles quand le document s'allonge. */
+.doc-workspace > .doc-collab {
+  position: sticky;
+  top: 1rem;
+}
+
+/* Colonne de gauche : invitation empilee au-dessus des appels. */
+.collab-panel {
   display: grid;
   gap: 1.25rem;
-  min-width: 0;
 }
 
-.collab-right {
-  min-width: 0;
-}
-
-/* L'invitation est deja une carte, on retire sa marge dans la colonne. */
-.collab-left .invite-section {
+.collab-panel .invite-section {
   margin-bottom: 0;
+}
+
+@media (max-width: 1024px) {
+  .doc-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .doc-workspace > .doc-collab {
+    position: static;
+  }
 }
 
 /* Barre de recherche des participants a appeler. */
@@ -1328,7 +1339,7 @@ button {
 }
 
 .doc-collab .chat {
-  height: 20rem;
+  height: 30rem;
 }
 
 .doc-collab .participants h3,
@@ -1403,8 +1414,3 @@ button {
   box-shadow: 0 10px 30px rgb(15 23 42 / 15%);
 }
 
-@media (max-width: 860px) {
-  .collab-grid {
-    grid-template-columns: 1fr;
-  }
-}
