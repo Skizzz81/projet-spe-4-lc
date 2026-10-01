@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentEditor } from '../components/editor/DocumentEditor.jsx';
 import { DocumentCollaboration } from '../components/DocumentCollaboration.jsx';
+import { Chat } from '../components/Chat.jsx';
 import { socket } from '../lib/socket.js';
 
 export function DocumentPage({
@@ -119,40 +120,48 @@ export function DocumentPage({
 
       {!canEdit && <p>Tu disposes d’un accès en lecture seule.</p>}
 
-      <DocumentEditor
-        content={document.content}
-        onChange={handleContentChange}
-        readOnly={!canEdit}
-      />
+      <div className="doc-workspace">
+        <DocumentCollaboration documentId={activeDocumentId}>
+          {isOwner && (
+            <section className="invite-section">
+              <h2>Inviter une personne</h2>
+              <form className="invite-form" onSubmit={handleInvite}>
+                <label htmlFor="invite-email">Adresse email</label>
+                <div>
+                  <input
+                    id="invite-email"
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(event) => setInviteEmail(event.target.value)}
+                    placeholder="utilisateur@exemple.com"
+                    required
+                  />
+                  <button className="primary-button" type="submit" disabled={isInviting}>
+                    {isInviting ? 'Invitation…' : 'Inviter'}
+                  </button>
+                </div>
+              </form>
 
-      <DocumentCollaboration documentId={activeDocumentId}>
-        {isOwner && (
-          <section className="invite-section">
-            <h2>Inviter une personne</h2>
-            <form className="invite-form" onSubmit={handleInvite}>
-              <label htmlFor="invite-email">Adresse email</label>
-              <div>
-                <input
-                  id="invite-email"
-                  type="email"
-                  value={inviteEmail}
-                  onChange={(event) => setInviteEmail(event.target.value)}
-                  placeholder="utilisateur@exemple.com"
-                  required
-                />
-                <button className="primary-button" type="submit" disabled={isInviting}>
-                  {isInviting ? 'Invitation…' : 'Inviter'}
-                </button>
+              <div aria-live="polite">
+                {inviteMessage && <p className="invite-success">{inviteMessage}</p>}
+                {inviteError && <p className="invite-error">{inviteError}</p>}
               </div>
-            </form>
+            </section>
+          )}
+        </DocumentCollaboration>
 
-            <div aria-live="polite">
-              {inviteMessage && <p className="invite-success">{inviteMessage}</p>}
-              {inviteError && <p className="invite-error">{inviteError}</p>}
-            </div>
-          </section>
-        )}
-      </DocumentCollaboration>
+        <div className="doc-center">
+          <DocumentEditor
+            content={document.content}
+            onChange={handleContentChange}
+            readOnly={!canEdit}
+          />
+        </div>
+
+        <aside className="doc-collab chat-panel">
+          <Chat />
+        </aside>
+      </div>
     </main>
   );
 }
