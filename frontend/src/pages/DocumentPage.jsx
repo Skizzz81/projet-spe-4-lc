@@ -119,40 +119,40 @@ export function DocumentPage({
 
       {!canEdit && <p>Tu disposes d’un accès en lecture seule.</p>}
 
-      {isOwner && (
-        <section className="invite-section">
-          <h2>Inviter une personne</h2>
-          <form className="invite-form" onSubmit={handleInvite}>
-            <label htmlFor="invite-email">Adresse email</label>
-            <div>
-              <input
-                id="invite-email"
-                type="email"
-                value={inviteEmail}
-                onChange={(event) => setInviteEmail(event.target.value)}
-                placeholder="utilisateur@exemple.com"
-                required
-              />
-              <button className="primary-button" type="submit" disabled={isInviting}>
-                {isInviting ? 'Invitation…' : 'Inviter'}
-              </button>
-            </div>
-          </form>
-
-          <div aria-live="polite">
-            {inviteMessage && <p className="invite-success">{inviteMessage}</p>}
-            {inviteError && <p className="invite-error">{inviteError}</p>}
-          </div>
-        </section>
-      )}
-
       <DocumentEditor
         content={document.content}
         onChange={handleContentChange}
         readOnly={!canEdit}
       />
 
-      <DocumentCollaboration documentId={activeDocumentId} />
+      <DocumentCollaboration documentId={activeDocumentId}>
+        {isOwner && (
+          <section className="invite-section">
+            <h2>Inviter une personne</h2>
+            <form className="invite-form" onSubmit={handleInvite}>
+              <label htmlFor="invite-email">Adresse email</label>
+              <div>
+                <input
+                  id="invite-email"
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(event) => setInviteEmail(event.target.value)}
+                  placeholder="utilisateur@exemple.com"
+                  required
+                />
+                <button className="primary-button" type="submit" disabled={isInviting}>
+                  {isInviting ? 'Invitation…' : 'Inviter'}
+                </button>
+              </div>
+            </form>
+
+            <div aria-live="polite">
+              {inviteMessage && <p className="invite-success">{inviteMessage}</p>}
+              {inviteError && <p className="invite-error">{inviteError}</p>}
+            </div>
+          </section>
+        )}
+      </DocumentCollaboration>
     </main>
   );
 }

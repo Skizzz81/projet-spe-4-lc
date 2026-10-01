@@ -4,12 +4,13 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useVoiceCall } from '../lib/useVoiceCall.js';
 import { Chat } from './Chat.jsx';
 
-// Panneau d'appel + messagerie affiche pendant l'edition d'un document.
+// Panneau de la "room" d'un document : invitation + appel a gauche, chat a droite.
 // La presence est liee au document courant et au vrai compte connecte.
-export function DocumentCollaboration({ documentId }) {
+export function DocumentCollaboration({ documentId, children }) {
   const { user } = useAuth();
   const monId = user?.id;
   const [participants, setParticipants] = useState([]);
+  const [recherche, setRecherche] = useState('');
   const { call, muted, remoteAudioRef, startCall, acceptCall, hangup, toggleMute } =
     useVoiceCall();
 
@@ -34,33 +35,55 @@ export function DocumentCollaboration({ documentId }) {
     };
   }, [documentId]);
 
-  // Les autres presents (tout le monde sauf mon propre compte).
-  const autres = participants.filter((p) => p.userId !== monId);
+  // Les autres presents (tout le monde sauf mon compte), filtres par la recherche.
+  const q = recherche.trim().toLowerCase();
+  const autres = participants
+    .filter((p) => p.userId !== monId)
+    .filter(
+      (p) =>
+        !q ||
+        p.nom.toLowerCase().includes(q) ||
+        (p.email ?? '').toLowerCase().includes(q),
+    );
 
   return (
     <section className="doc-collab">
-      <h2>Appel et messagerie</h2>
+      <div className="collab-grid">
+        <div className="collab-left">
+          {children}
 
-      <div className="colonnes">
-        <aside className="participants">
-          <h3>En ligne ({autres.length})</h3>
-          {autres.length === 0 && <p className="vide">Personne d’autre pour l’instant.</p>}
-          <ul>
-            {autres.map((p) => (
-              <li key={p.userId}>
-                <span>{p.nom}</span>
-                <button
-                  onClick={() => startCall({ id: p.socketId, pseudo: p.nom })}
-                  disabled={Boolean(call)}
-                >
-                  Appeler
-                </button>
-              </li>
-            ))}
-          </ul>
-        </aside>
+          <aside className="participants">
+            <h3>Appel ({autres.length} en ligne)</h3>
+            <input
+              className="participant-search"
+              type="search"
+              placeholder="Rechercher par nom ou email..."
+              value={recherche}
+              onChange={(event) => setRecherche(event.target.value)}
+            />
+            {autres.length === 0 && <p className="vide">Personne à appeler pour l’instant.</p>}
+            <ul>
+              {autres.map((p) => (
+                <li key={p.userId}>
+                  <div className="participant-info">
+                    <span className="participant-name">{p.nom}</span>
+                    <span className="participant-email">{p.email}</span>
+                  </div>
+                  <button
+                    onClick={() => startCall({ id: p.socketId, pseudo: p.nom })}
+                    disabled={Boolean(call)}
+                  >
+                    Appeler
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        </div>
 
-        <Chat />
+        <div className="collab-right">
+          <Chat />
+        </div>
       </div>
 
       {/* Barre d'appel : s'affiche seulement quand il se passe quelque chose. */}
