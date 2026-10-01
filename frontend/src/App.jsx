@@ -4,7 +4,6 @@ import { Room } from './components/Room.jsx';
 import { CreateDocumentModal } from './components/documents/CreateDocumentModal.jsx';
 import { Header } from './components/layout/Header.jsx';
 import { Sidebar } from './components/layout/Sidebar.jsx';
-import { TwoFactorSetup } from './components/TwoFactorSetup.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { useDocuments } from './hooks/useDocuments.js';
 import { socket } from './lib/socket.js';
@@ -23,7 +22,7 @@ const AUTH_VIEWS = {
 };
 
 function AuthenticationGate({ children }) {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const [view, setView] = useState(AUTH_VIEWS.LOGIN);
 
@@ -32,22 +31,8 @@ function AuthenticationGate({ children }) {
   }
 
   if (isAuthenticated) {
-    if (!user?.two_factor_enabled) {
-      return (
-        <div className="auth-screen">
-          <div className="auth-card">
-            <div className="auth-head">
-              <h2>Sécurise ton compte</h2>
-              <p className="auth-subtitle">
-                Active la double authentification pour accéder à tes documents.
-              </p>
-            </div>
-            <TwoFactorSetup isEnabled={false} />
-          </div>
-        </div>
-      );
-    }
-
+    // La double authentification est optionnelle : elle s'active / se desactive
+    // depuis la page profil. On ne force plus sa configuration a l'entree.
     return children;
   }
 
