@@ -92,6 +92,7 @@ async function listPresence(documentId, excludeSocketId) {
     parUtilisateur.set(utilisateur.id, {
       userId: utilisateur.id,
       nom: utilisateur.nom,
+      email: utilisateur.email,
       socketId: presentSocket.id,
     });
   }
