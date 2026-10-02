@@ -159,7 +159,7 @@ export function DocumentPage({
         </div>
 
         <aside className="doc-collab chat-panel">
-          <Chat />
+          <Chat documentId={activeDocumentId} />
         </aside>
       </div>
     </main>

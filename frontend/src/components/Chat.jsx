@@ -1,20 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { socket } from '../lib/socket.js';
 
-// Panneau de chat texte. Les messages passent par le serveur Socket.IO.
-export function Chat() {
+// Panneau de chat texte. Avec un documentId, la conversation est propre a ce document.
+export function Chat({ documentId }) {
   const [messages, setMessages] = useState([]);
   const [texte, setTexte] = useState('');
   const finRef = useRef(null);
 
   useEffect(() => {
+    // On repart d'une conversation vide quand on change de document.
+    setMessages([]);
+
     function onMessage(message) {
       setMessages((liste) => [...liste, message]);
     }
 
     socket.on('chat:message', onMessage);
     return () => socket.off('chat:message', onMessage);
-  }, []);
+  }, [documentId]);
 
   // On scroll en bas à chaque nouveau message.
   useEffect(() => {
@@ -25,7 +28,8 @@ export function Chat() {
     event.preventDefault();
     const contenu = texte.trim();
     if (!contenu) return;
-    socket.emit('chat:message', contenu);
+    // Chat d'un document -> on envoie le documentId ; sinon chat global (/room).
+    socket.emit('chat:message', documentId ? { documentId, text: contenu } : contenu);
     setTexte('');
   }
 
