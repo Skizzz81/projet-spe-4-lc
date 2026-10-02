@@ -1334,6 +1334,61 @@ button {
   text-overflow: ellipsis;
 }
 
+/* Commandes de l'appel de groupe */
+.call-join {
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.call-controls {
+  display: grid;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 0.6rem;
+}
+
+.call-status {
+  font-weight: 700;
+}
+
+.call-members {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  list-style: none;
+}
+
+.call-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.call-actions button {
+  flex: 1;
+}
+
+.doc-collab .call-leave {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+.doc-collab .call-leave:hover:not(:disabled) {
+  background: #991b1b;
+}
+
+.online-title {
+  margin: 0 0 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
 /* Les deux blocs prennent le meme style de carte que le reste de l'app. */
 .doc-collab .participants,
 .doc-collab .chat {

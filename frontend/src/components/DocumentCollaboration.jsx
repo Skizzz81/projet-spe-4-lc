@@ -3,21 +3,21 @@ import { socket } from '../lib/socket.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useVoiceCall } from '../lib/useVoiceCall.js';
 
-// Colonne de gauche de la room : invitation (children) + appel des participants.
+// Colonne de gauche de la room : invitation (children) + appel de groupe des participants.
 // La presence est liee au document courant et au vrai compte connecte.
 export function DocumentCollaboration({ documentId, children }) {
   const { user } = useAuth();
   const monId = user?.id;
-  const [participants, setParticipants] = useState([]);
+  const [enLigne, setEnLigne] = useState([]);
   const [recherche, setRecherche] = useState('');
-  const { call, muted, remoteAudioRef, startCall, acceptCall, hangup, toggleMute } =
-    useVoiceCall();
+  const { inCall, muted, participants: dansAppel, joinCall, leaveCall, toggleMute } =
+    useVoiceCall(documentId);
 
   useEffect(() => {
     if (!documentId) return undefined;
 
     function onList(liste) {
-      setParticipants(liste);
+      setEnLigne(liste);
     }
 
     function sync() {
@@ -36,7 +36,7 @@ export function DocumentCollaboration({ documentId, children }) {
 
   // Les autres presents (tout le monde sauf mon compte), filtres par la recherche.
   const q = recherche.trim().toLowerCase();
-  const autres = participants
+  const autres = enLigne
     .filter((p) => p.userId !== monId)
     .filter(
       (p) =>
@@ -50,7 +50,34 @@ export function DocumentCollaboration({ documentId, children }) {
       {children}
 
       <aside className="participants">
-        <h3>Appel ({autres.length} en ligne)</h3>
+        <h3>Appel</h3>
+
+        {inCall ? (
+          <div className="call-controls">
+            <span className="call-status">🟢 En appel · {dansAppel.length + 1}</span>
+            {dansAppel.length > 0 && (
+              <ul className="call-members">
+                {dansAppel.map((p) => (
+                  <li key={p.socketId}>{p.nom}</li>
+                ))}
+              </ul>
+            )}
+            <div className="call-actions">
+              <button onClick={toggleMute}>
+                {muted ? 'Réactiver le micro' : 'Couper le micro'}
+              </button>
+              <button className="call-leave" onClick={leaveCall}>
+                Quitter l'appel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button className="call-join" onClick={joinCall}>
+            Rejoindre l'appel
+          </button>
+        )}
+
+        <h4 className="online-title">En ligne ({autres.length})</h4>
         <input
           className="participant-search"
           type="search"
@@ -58,7 +85,7 @@ export function DocumentCollaboration({ documentId, children }) {
           value={recherche}
           onChange={(event) => setRecherche(event.target.value)}
         />
-        {autres.length === 0 && <p className="vide">Personne à appeler pour l’instant.</p>}
+        {autres.length === 0 && <p className="vide">Personne d’autre pour l’instant.</p>}
         <ul>
           {autres.map((p) => (
             <li key={p.userId}>
@@ -66,45 +93,23 @@ export function DocumentCollaboration({ documentId, children }) {
                 <span className="participant-name">{p.nom}</span>
                 <span className="participant-email">{p.email}</span>
               </div>
-              <button
-                onClick={() => startCall({ id: p.socketId, pseudo: p.nom })}
-                disabled={Boolean(call)}
-              >
-                Appeler
-              </button>
             </li>
           ))}
         </ul>
       </aside>
 
-      {/* Barre d'appel : s'affiche seulement quand il se passe quelque chose. */}
-      {call && (
-        <div className="barre-appel">
-          {call.status === 'incoming' && (
-            <>
-              <span>📞 {call.peerPseudo} t’appelle...</span>
-              <button onClick={acceptCall}>Accepter</button>
-              <button onClick={hangup}>Refuser</button>
-            </>
-          )}
-          {call.status === 'calling' && (
-            <>
-              <span>Appel de {call.peerPseudo}...</span>
-              <button onClick={hangup}>Annuler</button>
-            </>
-          )}
-          {call.status === 'in-call' && (
-            <>
-              <span>🟢 En appel avec {call.peerPseudo}</span>
-              <button onClick={toggleMute}>{muted ? 'Réactiver le micro' : 'Couper le micro'}</button>
-              <button onClick={hangup}>Raccrocher</button>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Lecture du son distant. */}
-      <audio ref={remoteAudioRef} autoPlay />
+      {/* Un element audio par participant distant de l'appel. */}
+      {dansAppel.map((p) => (
+        <audio
+          key={p.socketId}
+          autoPlay
+          ref={(el) => {
+            if (el && p.stream && el.srcObject !== p.stream) {
+              el.srcObject = p.stream;
+            }
+          }}
+        />
+      ))}
     </div>
   );
 }
