@@ -16,6 +16,14 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+INSERT INTO users (nom, email, password, role)
+VALUES (
+  'Administrateur',
+  'admin@projet.local',
+  '$2b$10$KTziFQVCKlBt06nYfOFxP.nzrnRqaubT2AjUywK.NfSrqxRQXuhoi',
+  'admin'
+);
+
 CREATE TABLE IF NOT EXISTS folders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   owner_id INT NOT NULL,

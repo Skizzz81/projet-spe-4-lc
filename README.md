@@ -39,6 +39,13 @@ Construis et démarre ensuite les quatre services :
 docker compose up --build
 ```
 
+### Compte administrateur
+
+Le compte administrateur est créé automatiquement lors de la première initialisation de MySQL :
+
+- Email : `admin@projet.local`
+- Mot de passe : `Admin123!`
+
 Les services sont disponibles aux adresses suivantes :
 
 - frontend : http://localhost:5173

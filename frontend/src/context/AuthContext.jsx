@@ -38,8 +38,6 @@ export function AuthProvider({ children }) {
     await refreshProfile();
   }, [refreshProfile]);
 
-  const register = useCallback((credentials) => authApi.register(credentials), []);
-
   const logout = useCallback(async () => {
     await authApi.logout();
     setUser(null);
@@ -50,7 +48,6 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(user),
     isLoading,
     login,
-    register,
     logout,
     verifyLogin2fa,
     refreshProfile,

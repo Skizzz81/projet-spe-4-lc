@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 
-export function LoginPage({ onNavigateToRegister, onTwoFactorRequired, onLoggedIn }) {
+export function LoginPage({ onTwoFactorRequired, onLoggedIn }) {
   const { login } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState(null);
@@ -70,12 +70,6 @@ export function LoginPage({ onNavigateToRegister, onTwoFactorRequired, onLoggedI
           </button>
         </form>
 
-        <p className="auth-switch">
-          Pas encore de compte ?{' '}
-          <button type="button" className="auth-link" onClick={onNavigateToRegister}>
-            Créer un compte
-          </button>
-        </p>
       </div>
     </div>
   );

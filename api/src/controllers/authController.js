@@ -28,29 +28,6 @@ function issueAccessToken(res, user) {
     });
 }
 
-const register = async (req, res, next) => {
-    try {
-        const { nom, email, password } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const sql = `insert into users (nom, email, password) values (?, ?, ?)`;
-
-        const [result] = await database.query(sql, [nom, email, hashedPassword]);
-
-        res.status(201).json({
-            message: "Utilisateur créé avec succès",
-            id: result.insertId
-        });
-    } catch (error) {
-        if (error.code === "ER_DUP_ENTRY") {
-            return res.status(409).json({
-                message: "Cette adresse email est déjà utilisée"
-            });
-        }
-        next(error);
-    }
-};
-
 const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
@@ -290,4 +267,4 @@ const updateProfile = async (req, res, next) => {
     }
 };
 
-export { register, login, logout, verifyLogin2fa, setup2fa, enable2fa, disable2fa, getProfile, updateProfile };
+export { login, logout, verifyLogin2fa, setup2fa, enable2fa, disable2fa, getProfile, updateProfile };

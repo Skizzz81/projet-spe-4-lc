@@ -13,12 +13,10 @@ import { FolderPage } from './pages/FolderPage.jsx';
 import { AdminPage } from './pages/AdminPage.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
-import { RegisterPage } from './pages/RegisterPage.jsx';
 import { TwoFactorVerifyPage } from './pages/TwoFactorVerifyPage.jsx';
 
 const AUTH_VIEWS = {
   LOGIN: 'login',
-  REGISTER: 'register',
   TWO_FACTOR: 'two-factor',
 };
 
@@ -37,15 +35,6 @@ function AuthenticationGate({ children }) {
     return children;
   }
 
-  if (view === AUTH_VIEWS.REGISTER) {
-    return (
-      <RegisterPage
-        onSuccess={() => setView(AUTH_VIEWS.LOGIN)}
-        onNavigateToLogin={() => setView(AUTH_VIEWS.LOGIN)}
-      />
-    );
-  }
-
   if (view === AUTH_VIEWS.TWO_FACTOR) {
     return (
       <TwoFactorVerifyPage
@@ -59,7 +48,6 @@ function AuthenticationGate({ children }) {
 
   return (
     <LoginPage
-      onNavigateToRegister={() => setView(AUTH_VIEWS.REGISTER)}
       onTwoFactorRequired={() => setView(AUTH_VIEWS.TWO_FACTOR)}
       onLoggedIn={() => navigate('/', { replace: true })}
     />

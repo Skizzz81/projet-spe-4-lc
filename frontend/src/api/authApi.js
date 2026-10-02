@@ -17,10 +17,6 @@ async function request(path, options = {}) {
   return data;
 }
 
-export function register({ nom, email, password }) {
-  return request('/register', { method: 'POST', body: { nom, email, password } });
-}
-
 export function login({ email, password }) {
   return request('/login', { method: 'POST', body: { email, password } });
 }
