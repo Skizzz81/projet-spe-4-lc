@@ -62,6 +62,10 @@ function getPresenceRoom(documentId) {
   return `presence:${documentId}`;
 }
 
+function getCallRoom(documentId) {
+  return `call:${documentId}`;
+}
+
 // Recupere le vrai compte connecte via le cookie (meme principe que getDocumentAccess).
 async function getCurrentUser(socket) {
   const cookie = socket.handshake.headers.cookie;
@@ -197,7 +201,7 @@ io.on('connection', (socket) => {
   socket.on('call:offer', ({ to, sdp }) => {
     io.to(to).emit('call:offer', {
       from: socket.id,
-      fromPseudo: pseudos.get(socket.id) ?? 'Anonyme',
+      fromPseudo: socket.data.user?.nom ?? pseudos.get(socket.id) ?? 'Anonyme',
       sdp,
     });
   });
@@ -212,6 +216,39 @@ io.on('connection', (socket) => {
 
   socket.on('call:hangup', ({ to }) => {
     io.to(to).emit('call:hangup', { from: socket.id });
+  });
+
+  // --- Appel de groupe (mesh) : chaque participant se connecte a tous les autres ---
+  socket.on('call:join', async (documentId) => {
+    try {
+      const id = Number(documentId);
+      if (!Number.isInteger(id) || id <= 0) return;
+
+      if (!socket.data.user) {
+        socket.data.user = await getCurrentUser(socket);
+      }
+
+      const room = getCallRoom(id);
+      const autres = await io.in(room).fetchSockets();
+      // Le nouveau venu recoit la liste des gens deja en appel : c'est lui qui les appelle.
+      const peers = autres
+        .filter((s) => s.id !== socket.id)
+        .map((s) => ({ socketId: s.id, nom: s.data.user?.nom ?? 'Anonyme' }));
+
+      socket.join(room);
+      socket.emit('call:peers', peers);
+    } catch (error) {
+      console.error('call:join a échoué :', error.message);
+    }
+  });
+
+  socket.on('call:leave', (documentId) => {
+    const id = Number(documentId);
+    if (!Number.isInteger(id) || id <= 0) return;
+
+    const room = getCallRoom(id);
+    socket.to(room).emit('call:peer-left', { from: socket.id });
+    socket.leave(room);
   });
 
   // Presence par document, basee sur le vrai compte (corrige le "je me vois moi-meme").
@@ -235,14 +272,17 @@ io.on('connection', (socket) => {
   // Au depart, on met a jour la liste des documents ou la personne etait presente.
   socket.on('disconnecting', async () => {
     try {
-      const presenceRooms = [...socket.rooms].filter((room) => room.startsWith('presence:'));
-
-      for (const room of presenceRooms) {
-        const id = Number(room.slice('presence:'.length));
-        socket.to(room).emit('presence:list', await listPresence(id, socket.id));
+      for (const room of socket.rooms) {
+        if (room.startsWith('presence:')) {
+          const id = Number(room.slice('presence:'.length));
+          socket.to(room).emit('presence:list', await listPresence(id, socket.id));
+        } else if (room.startsWith('call:')) {
+          // On previent les autres participants de l'appel que la personne part.
+          socket.to(room).emit('call:peer-left', { from: socket.id });
+        }
       }
     } catch (error) {
-      console.error('Nettoyage de présence à la déconnexion a échoué :', error.message);
+      console.error('Nettoyage à la déconnexion a échoué :', error.message);
     }
   });
 
