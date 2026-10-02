@@ -10,8 +10,11 @@ export function DocumentCollaboration({ documentId, children }) {
   const monId = user?.id;
   const [enLigne, setEnLigne] = useState([]);
   const [recherche, setRecherche] = useState('');
-  const { inCall, muted, participants: dansAppel, joinCall, leaveCall, toggleMute } =
+  const { inCall, muted, participants: dansAppel, roster, joinCall, leaveCall, toggleMute } =
     useVoiceCall(documentId);
+
+  // Qui est dans l'appel, moi exclu (pour l'affichage).
+  const autresDansAppel = roster.filter((r) => r.socketId !== socket.id);
 
   useEffect(() => {
     if (!documentId) return undefined;
@@ -54,10 +57,10 @@ export function DocumentCollaboration({ documentId, children }) {
 
         {inCall ? (
           <div className="call-controls">
-            <span className="call-status">🟢 En appel · {dansAppel.length + 1}</span>
-            {dansAppel.length > 0 && (
+            <span className="call-status">🟢 En appel · {roster.length}</span>
+            {autresDansAppel.length > 0 && (
               <ul className="call-members">
-                {dansAppel.map((p) => (
+                {autresDansAppel.map((p) => (
                   <li key={p.socketId}>{p.nom}</li>
                 ))}
               </ul>
@@ -71,10 +74,27 @@ export function DocumentCollaboration({ documentId, children }) {
               </button>
             </div>
           </div>
+        ) : autresDansAppel.length > 0 ? (
+          <div className="call-controls">
+            <span className="call-status">📞 Appel en cours · {autresDansAppel.length}</span>
+            <ul className="call-members">
+              {autresDansAppel.map((p) => (
+                <li key={p.socketId}>{p.nom}</li>
+              ))}
+            </ul>
+            <button className="call-join" onClick={joinCall}>
+              Rejoindre l'appel
+            </button>
+          </div>
         ) : (
-          <button className="call-join" onClick={joinCall}>
-            Rejoindre l'appel
-          </button>
+          <>
+            <button className="call-join" onClick={joinCall}>
+              Démarrer un appel
+            </button>
+            <p className="call-hint">
+              Lance un appel vocal, les autres sur le document pourront te rejoindre.
+            </p>
+          </>
         )}
 
         <h4 className="online-title">En ligne ({autres.length})</h4>
