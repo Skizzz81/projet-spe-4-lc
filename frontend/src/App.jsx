@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
-import { Room } from './components/Room.jsx';
 import { CreateDocumentModal } from './components/documents/CreateDocumentModal.jsx';
 import { Header } from './components/layout/Header.jsx';
 import { Sidebar } from './components/layout/Sidebar.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { useDocuments } from './hooks/useDocuments.js';
-import { socket } from './lib/socket.js';
 import { DashboardPage } from './pages/DashboardPage.jsx';
 import { DocumentPage } from './pages/DocumentPage.jsx';
 import { AdminPage } from './pages/AdminPage.jsx';
@@ -62,20 +60,6 @@ function AuthenticationGate({ children }) {
       onTwoFactorRequired={() => setView(AUTH_VIEWS.TWO_FACTOR)}
     />
   );
-}
-
-function RealtimeRoomPage() {
-  const { user } = useAuth();
-  const pseudo = user?.nom ?? user?.email ?? 'Utilisateur';
-
-  useEffect(() => {
-    socket.connect();
-    socket.emit('join', pseudo);
-
-    return () => socket.disconnect();
-  }, [pseudo]);
-
-  return <Room pseudo={pseudo} />;
 }
 
 function WorkspaceApp() {
@@ -167,7 +151,6 @@ function WorkspaceApp() {
             )
           }
         />
-        <Route path="/room" element={<RealtimeRoomPage />} />
       </Routes>
 
       {isCreateModalOpen && (
