@@ -170,17 +170,27 @@ io.on('connection', (socket) => {
     socket.to(room).emit('document:updated', { documentId, content });
   });
 
-  socket.on('chat:message', (text) => {
-    const contenu = String(text ?? '').trim();
+  socket.on('chat:message', (payload) => {
+    // Deux formes : une chaine (chat global de /room) ou { documentId, text } (chat d'un document).
+    const scoped = payload && typeof payload === 'object';
+    const contenu = String((scoped ? payload.text : payload) ?? '').trim();
     if (!contenu) return;
 
-    io.to(ROOM).emit('chat:message', {
+    const message = {
       id: `${socket.id}-${Date.now()}`,
       fromId: socket.id,
-      from: pseudos.get(socket.id) ?? 'Anonyme',
+      from: socket.data.user?.nom ?? pseudos.get(socket.id) ?? 'Anonyme',
       text: contenu,
       at: Date.now(),
-    });
+    };
+
+    if (scoped) {
+      const room = getPresenceRoom(Number(payload.documentId));
+      if (!socket.rooms.has(room)) return; // on n'envoie qu'aux gens du meme document
+      io.to(room).emit('chat:message', message);
+    } else {
+      io.to(ROOM).emit('chat:message', message);
+    }
   });
 
   // --- Signalisation WebRTC (le serveur ne fait que relayer, l'audio est en pair a pair) ---
