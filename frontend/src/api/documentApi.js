@@ -45,3 +45,53 @@ export function inviteDocumentMember(documentId, email) {
   // POST /api/documents/:documentId/members
   return request(`/${documentId}/members`, { method: 'POST', body: { email } });
 }
+
+// Lit un fichier et renvoie son contenu en base64 (sans le prefixe "data:...,").
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result);
+      resolve(result.slice(result.indexOf(',') + 1));
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function uploadFile(title, file) {
+  const fileBase64 = await fileToBase64(file);
+  return request('/upload', {
+    method: 'POST',
+    body: {
+      title,
+      fileName: file.name,
+      fileMime: file.type || 'application/octet-stream',
+      fileBase64,
+    },
+  });
+}
+
+export async function replaceFile(documentId, file) {
+  const fileBase64 = await fileToBase64(file);
+  return request(`/${documentId}/file`, {
+    method: 'PUT',
+    body: {
+      fileName: file.name,
+      fileMime: file.type || 'application/octet-stream',
+      fileBase64,
+    },
+  });
+}
+
+export async function fetchFileBlob(documentId) {
+  const response = await fetch(`${API_URL}/api/documents/${documentId}/file`, {
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Fichier introuvable');
+  }
+
+  return response.blob();
+}

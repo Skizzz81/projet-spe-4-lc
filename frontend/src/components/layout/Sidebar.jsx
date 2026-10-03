@@ -6,7 +6,7 @@ const navigationItems = [
   { label: 'Partagés avec moi', symbol: '♧', to: '/shared' },
 ];
 
-export function Sidebar({ onCreateDocument }) {
+export function Sidebar({ onCreateDocument, onUploadFile }) {
   const { user } = useAuth();
   const items = user?.role === 'admin'
     ? [...navigationItems, { label: 'Administration', symbol: '⚙', to: '/admin' }]
@@ -29,6 +29,20 @@ export function Sidebar({ onCreateDocument }) {
         <span aria-hidden="true">+</span>
         Nouveau document
       </button>
+
+      <label className="upload-document-button">
+        <span aria-hidden="true">⭳</span>
+        Importer un fichier
+        <input
+          type="file"
+          hidden
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) onUploadFile(file);
+            event.target.value = '';
+          }}
+        />
+      </label>
 
       <nav className="sidebar-navigation" aria-label="Navigation principale">
         {items.map((item) => (

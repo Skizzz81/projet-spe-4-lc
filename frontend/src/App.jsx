@@ -58,6 +58,7 @@ function AuthenticationGate({ children }) {
     <LoginPage
       onNavigateToRegister={() => setView(AUTH_VIEWS.REGISTER)}
       onTwoFactorRequired={() => setView(AUTH_VIEWS.TWO_FACTOR)}
+      onLoggedIn={() => navigate('/', { replace: true })}
     />
   );
 }
@@ -69,6 +70,8 @@ function WorkspaceApp() {
   const {
     documents,
     createDocument,
+    uploadDocument,
+    replaceDocumentFile,
     updateDocumentContent,
     deleteDocument,
     inviteDocumentMember,
@@ -83,6 +86,11 @@ function WorkspaceApp() {
     navigate('/');
   }
 
+  async function handleUploadFile(file) {
+    const document = await uploadDocument(file.name, file);
+    navigate(`/documents/${document.id}`);
+  }
+
   return (
     <>
       <Routes>
@@ -90,7 +98,10 @@ function WorkspaceApp() {
           path="/"
           element={
             <div className="app-shell">
-              <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+              <Sidebar
+                onCreateDocument={() => setIsCreateModalOpen(true)}
+                onUploadFile={handleUploadFile}
+              />
 
               <div className="workspace">
                 <Header />
@@ -108,7 +119,10 @@ function WorkspaceApp() {
           path="/shared"
           element={
             <div className="app-shell">
-              <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+              <Sidebar
+                onCreateDocument={() => setIsCreateModalOpen(true)}
+                onUploadFile={handleUploadFile}
+              />
 
               <div className="workspace">
                 <Header />
@@ -128,6 +142,7 @@ function WorkspaceApp() {
             <DocumentPage
               documents={documents}
               onContentChange={updateDocumentContent}
+              onReplaceFile={replaceDocumentFile}
               onDelete={deleteDocument}
               onInvite={inviteDocumentMember}
               onRemoteContent={applyRemoteDocumentContent}
@@ -140,7 +155,10 @@ function WorkspaceApp() {
           element={
             user?.role === 'admin' ? (
               <div className="app-shell">
-                <Sidebar onCreateDocument={() => setIsCreateModalOpen(true)} />
+                <Sidebar
+                onCreateDocument={() => setIsCreateModalOpen(true)}
+                onUploadFile={handleUploadFile}
+              />
                 <div className="workspace">
                   <Header />
                   <AdminPage />

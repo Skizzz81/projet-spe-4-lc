@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { DocumentEditor } from '../components/editor/DocumentEditor.jsx';
+import { DocumentFile } from '../components/documents/DocumentFile.jsx';
 import { DocumentCollaboration } from '../components/DocumentCollaboration.jsx';
 import { Chat } from '../components/Chat.jsx';
 import { socket } from '../lib/socket.js';
@@ -8,6 +9,7 @@ import { socket } from '../lib/socket.js';
 export function DocumentPage({
   documents,
   onContentChange,
+  onReplaceFile,
   onDelete,
   onInvite,
   onRemoteContent,
@@ -151,11 +153,19 @@ export function DocumentPage({
         </DocumentCollaboration>
 
         <div className="doc-center">
-          <DocumentEditor
-            content={document.content}
-            onChange={handleContentChange}
-            readOnly={!canEdit}
-          />
+          {document.type === 'file' ? (
+            <DocumentFile
+              document={document}
+              canEdit={canEdit}
+              onReplace={(file) => onReplaceFile(document.id, file)}
+            />
+          ) : (
+            <DocumentEditor
+              content={document.content}
+              onChange={handleContentChange}
+              readOnly={!canEdit}
+            />
+          )}
         </div>
 
         <aside className="doc-collab chat-panel">

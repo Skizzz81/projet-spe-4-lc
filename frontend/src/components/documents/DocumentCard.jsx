@@ -34,6 +34,7 @@ export function DocumentCard({ document }) {
 
       <span className="document-information">
         <span className="document-title">{document.title}</span>
+        {document.type === 'file' && <span className="document-type-badge">Fichier</span>}
         <span
           className="document-metadata"
           title={`Modifié ${updatedAt} par ${document.lastModifiedBy}`}

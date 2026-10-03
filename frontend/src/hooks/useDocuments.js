@@ -42,6 +42,30 @@ export function useDocuments() {
     }
   }
 
+  async function uploadDocument(title, file) {
+    const data = await documentApi.uploadFile(title, file);
+    setDocuments((currentDocuments) => [data.document, ...currentDocuments]);
+    return data.document;
+  }
+
+  async function replaceDocumentFile(documentId, file) {
+    const data = await documentApi.replaceFile(documentId, file);
+    setDocuments((currentDocuments) =>
+      currentDocuments.map((document) =>
+        document.id === documentId
+          ? {
+              ...document,
+              fileName: data.document.fileName,
+              fileMime: data.document.fileMime,
+              updatedAt: data.document.updatedAt,
+              lastModifiedBy: data.document.lastModifiedBy,
+            }
+          : document,
+      ),
+    );
+    return data.document;
+  }
+
   async function deleteDocument(documentId) {
     await documentApi.deleteDocument(documentId);
     setDocuments((currentDocuments) =>
@@ -64,6 +88,8 @@ export function useDocuments() {
   return {
     documents,
     createDocument,
+    uploadDocument,
+    replaceDocumentFile,
     updateDocumentContent,
     deleteDocument,
     inviteDocumentMember,
