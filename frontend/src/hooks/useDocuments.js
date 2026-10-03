@@ -4,12 +4,25 @@ import * as documentApi from '../api/documentApi.js';
 export function useDocuments() {
   const [documents, setDocuments] = useState([]);
 
-  useEffect(() => {
-    documentApi
+  const refreshDocuments = useCallback(() => {
+    return documentApi
       .listDocuments()
       .then((data) => setDocuments(data.documents))
       .catch(console.error);
   }, []);
+
+  useEffect(() => {
+    refreshDocuments();
+
+    // On recharge la liste quand on revient sur l'onglet : un document
+    // partage pendant qu'on etait ailleurs apparait alors tout seul.
+    function handleFocus() {
+      refreshDocuments();
+    }
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [refreshDocuments]);
 
   async function createDocument(title, folderId = null) {
     const data = await documentApi.createDocument(title, folderId);
