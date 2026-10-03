@@ -103,8 +103,8 @@ function WorkspaceApp() {
   }
 
   async function handleUploadFile(file, folderId = null) {
-    const document = await uploadDocument(file.name, file, folderId);
-    navigate(`/documents/${document.id}`);
+    // On ne change pas de page : la carte du fichier s'ajoute simplement a la liste courante.
+    await uploadDocument(file.name, file, folderId);
   }
 
   return (
