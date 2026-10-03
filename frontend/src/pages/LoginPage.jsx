@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 
-export function LoginPage({ onNavigateToRegister, onTwoFactorRequired }) {
+export function LoginPage({ onNavigateToRegister, onTwoFactorRequired, onLoggedIn }) {
   const { login } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState(null);
@@ -22,6 +22,9 @@ export function LoginPage({ onNavigateToRegister, onTwoFactorRequired }) {
 
       if (result.twoFactorRequired) {
         onTwoFactorRequired?.();
+      } else {
+        // On arrive toujours sur le dashboard apres connexion, pas sur la page en cours.
+        onLoggedIn?.();
       }
     } catch (submitError) {
       setError(submitError.message);
