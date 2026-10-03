@@ -42,8 +42,8 @@ export function useDocuments() {
     }
   }
 
-  async function uploadDocument(title, file) {
-    const data = await documentApi.uploadFile(title, file);
+  async function uploadDocument(title, file, folderId = null) {
+    const data = await documentApi.uploadFile(title, file, folderId);
     setDocuments((currentDocuments) => [data.document, ...currentDocuments]);
     return data.document;
   }

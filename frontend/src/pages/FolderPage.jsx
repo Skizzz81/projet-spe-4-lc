@@ -8,6 +8,7 @@ export function FolderPage({
   documents,
   isLoadingFolders,
   onCreateDocument,
+  onUploadFile,
 }) {
   const { folderId } = useParams();
   const currentFolderId = Number(folderId);
@@ -28,7 +29,10 @@ export function FolderPage({
 
   return (
     <div className="app-shell">
-      <Sidebar onCreateDocument={() => onCreateDocument(currentFolderId)} />
+      <Sidebar
+        onCreateDocument={() => onCreateDocument(currentFolderId)}
+        onUploadFile={(file) => onUploadFile(file, currentFolderId)}
+      />
 
       <div className="workspace">
         <Header />

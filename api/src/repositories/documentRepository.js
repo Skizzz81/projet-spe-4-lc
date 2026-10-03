@@ -65,11 +65,11 @@ export async function updateDocumentContent(documentId, userId, content) {
   return result.affectedRows;
 }
 
-export async function insertFileDocument(userId, title, fileName, fileMime, buffer) {
+export async function insertFileDocument(userId, title, folderId, fileName, fileMime, buffer) {
   const [result] = await database.query(
-    `INSERT INTO documents (owner_id, last_modified_by, title, content, type, file_name, file_mime, file_data)
-     VALUES (?, ?, ?, '', 'file', ?, ?, ?)`,
-    [userId, userId, title, fileName, fileMime, buffer],
+    `INSERT INTO documents (owner_id, last_modified_by, folder_id, title, content, type, file_name, file_mime, file_data)
+     VALUES (?, ?, ?, ?, '', 'file', ?, ?, ?)`,
+    [userId, userId, folderId, title, fileName, fileMime, buffer],
   );
 
   return result.insertId;

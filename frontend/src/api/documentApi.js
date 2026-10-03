@@ -59,12 +59,13 @@ function fileToBase64(file) {
   });
 }
 
-export async function uploadFile(title, file) {
+export async function uploadFile(title, file, folderId = null) {
   const fileBase64 = await fileToBase64(file);
   return request('/upload', {
     method: 'POST',
     body: {
       title,
+      folderId,
       fileName: file.name,
       fileMime: file.type || 'application/octet-stream',
       fileBase64,

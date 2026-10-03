@@ -103,8 +103,8 @@ function WorkspaceApp() {
     setIsCreateModalOpen(true);
   }
 
-  async function handleUploadFile(file) {
-    const document = await uploadDocument(file.name, file);
+  async function handleUploadFile(file, folderId = null) {
+    const document = await uploadDocument(file.name, file, folderId);
     navigate(`/documents/${document.id}`);
   }
 
@@ -164,6 +164,7 @@ function WorkspaceApp() {
               folders={folders}
               isLoadingFolders={isLoadingFolders}
               onCreateDocument={openCreateDocument}
+              onUploadFile={handleUploadFile}
             />
           }
         />

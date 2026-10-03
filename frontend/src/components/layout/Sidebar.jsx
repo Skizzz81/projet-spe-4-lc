@@ -41,19 +41,21 @@ export function Sidebar({ onCreateDocument, onUploadFile, onCreateFolder }) {
         </button>
       )}
 
-      <label className="upload-document-button">
-        <span aria-hidden="true">⭳</span>
-        Importer un fichier
-        <input
-          type="file"
-          hidden
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (file) onUploadFile(file);
-            event.target.value = '';
-          }}
-        />
-      </label>
+      {onUploadFile && (
+        <label className="upload-document-button">
+          <span aria-hidden="true">⭳</span>
+          Importer un fichier
+          <input
+            type="file"
+            hidden
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) onUploadFile(file);
+              event.target.value = '';
+            }}
+          />
+        </label>
+      )}
 
       <nav className="sidebar-navigation" aria-label="Navigation principale">
         {items.map((item) => (

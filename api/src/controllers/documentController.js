@@ -108,10 +108,27 @@ export async function uploadDocument(req, res, next) {
       return res.status(400).json({ message: 'Fichier invalide' });
     }
 
+    let folderId = null;
+
+    if (req.body.folderId !== undefined && req.body.folderId !== null) {
+      folderId = Number(req.body.folderId);
+
+      if (!Number.isInteger(folderId) || folderId <= 0) {
+        return res.status(400).json({ message: 'Dossier invalide' });
+      }
+
+      const folder = await findFolderByIdAndOwner(folderId, req.user.id);
+
+      if (!folder) {
+        return res.status(404).json({ message: 'Dossier introuvable' });
+      }
+    }
+
     const title = req.body.title?.trim() || file.fileName;
     const documentId = await insertFileDocument(
       req.user.id,
       title,
+      folderId,
       file.fileName,
       file.fileMime,
       file.buffer,
@@ -126,6 +143,7 @@ export async function uploadDocument(req, res, next) {
         fileName: file.fileName,
         fileMime: file.fileMime,
         ownerId: req.user.id,
+        folderId,
         access: 'owner',
         lastModifiedBy: 'Vous',
         updatedAt: new Date(),
