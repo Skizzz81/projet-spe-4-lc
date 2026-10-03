@@ -76,7 +76,6 @@ function WorkspaceApp() {
     documents,
     createDocument,
     uploadDocument,
-    replaceDocumentFile,
     updateDocumentContent,
     deleteDocument,
     inviteDocumentMember,
@@ -174,7 +173,6 @@ function WorkspaceApp() {
             <DocumentPage
               documents={documents}
               onContentChange={updateDocumentContent}
-              onReplaceFile={replaceDocumentFile}
               onDelete={deleteDocument}
               onInvite={inviteDocumentMember}
               onRemoteContent={applyRemoteDocumentContent}

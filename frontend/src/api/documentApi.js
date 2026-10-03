@@ -85,14 +85,7 @@ export async function replaceFile(documentId, file) {
   });
 }
 
-export async function fetchFileBlob(documentId) {
-  const response = await fetch(`${API_URL}/api/documents/${documentId}/file`, {
-    credentials: 'include',
-  });
-
-  if (!response.ok) {
-    throw new Error('Fichier introuvable');
-  }
-
-  return response.blob();
+export function fileUrl(documentId) {
+  // URL directe du fichier : le navigateur l'ouvre lui-meme (image, PDF, ...).
+  return `${API_URL}/api/documents/${documentId}/file`;
 }

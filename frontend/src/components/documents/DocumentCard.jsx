@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import * as documentApi from '../../api/documentApi.js';
 
 function DocumentIcon() {
   return (
@@ -20,9 +21,10 @@ export function DocumentCard({ document }) {
     editor: 'Éditeur',
     viewer: 'Lecture seule',
   };
+  const isFile = document.type === 'file';
 
-  return (
-    <Link className="document-card" to={`/documents/${document.id}`}>
+  const content = (
+    <>
       <span className="document-preview" aria-hidden="true">
         <span className="document-preview-icon">
           <DocumentIcon />
@@ -34,7 +36,7 @@ export function DocumentCard({ document }) {
 
       <span className="document-information">
         <span className="document-title">{document.title}</span>
-        {document.type === 'file' && <span className="document-type-badge">Fichier</span>}
+        {isFile && <span className="document-type-badge">Fichier</span>}
         <span
           className="document-metadata"
           title={`Modifié ${updatedAt} par ${document.lastModifiedBy}`}
@@ -45,6 +47,27 @@ export function DocumentCard({ document }) {
         </span>
         <span className="document-access">{accessLabels[document.access]}</span>
       </span>
+    </>
+  );
+
+  // Un fichier s'ouvre directement dans le navigateur (nouvel onglet).
+  if (isFile) {
+    return (
+      <a
+        className="document-card"
+        href={documentApi.fileUrl(document.id)}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  // Un document texte ouvre son espace d'edition collaborative.
+  return (
+    <Link className="document-card" to={`/documents/${document.id}`}>
+      {content}
     </Link>
   );
 }
