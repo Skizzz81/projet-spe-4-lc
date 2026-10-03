@@ -6,6 +6,9 @@ export async function findDocumentsByUser(userId) {
        d.id,
        d.title,
        d.content,
+       d.type,
+       d.file_name AS fileName,
+       d.file_mime AS fileMime,
        d.owner_id AS ownerId,
        CASE WHEN d.owner_id = ? THEN 'owner' ELSE dm.permission END AS access,
        COALESCE(modifier.nom, owner.nom) AS lastModifiedBy,
@@ -59,6 +62,44 @@ export async function updateDocumentContent(documentId, userId, content) {
   );
 
   return result.affectedRows;
+}
+
+export async function insertFileDocument(userId, title, fileName, fileMime, buffer) {
+  const [result] = await database.query(
+    `INSERT INTO documents (owner_id, last_modified_by, title, content, type, file_name, file_mime, file_data)
+     VALUES (?, ?, ?, '', 'file', ?, ?, ?)`,
+    [userId, userId, title, fileName, fileMime, buffer],
+  );
+
+  return result.insertId;
+}
+
+export async function replaceDocumentFile(documentId, userId, fileName, fileMime, buffer) {
+  const [result] = await database.query(
+    `UPDATE documents d
+     LEFT JOIN document_members dm
+       ON dm.document_id = d.id AND dm.user_id = ?
+     SET d.file_name = ?, d.file_mime = ?, d.file_data = ?,
+         d.last_modified_by = ?, d.updated_at = CURRENT_TIMESTAMP
+     WHERE d.id = ? AND d.type = 'file' AND (d.owner_id = ? OR dm.permission = 'editor')`,
+    [userId, fileName, fileMime, buffer, userId, documentId, userId],
+  );
+
+  return result.affectedRows;
+}
+
+export async function findDocumentFile(documentId, userId) {
+  const [rows] = await database.query(
+    `SELECT d.file_name AS fileName, d.file_mime AS fileMime, d.file_data AS fileData
+     FROM documents d
+     LEFT JOIN document_members dm
+       ON dm.document_id = d.id AND dm.user_id = ?
+     WHERE d.id = ? AND d.type = 'file' AND (d.owner_id = ? OR dm.user_id IS NOT NULL)
+     LIMIT 1`,
+    [userId, documentId, userId],
+  );
+
+  return rows[0] ?? null;
 }
 
 export async function removeDocument(documentId, userId) {

@@ -1,13 +1,29 @@
 import {
   findDocumentAccess,
+  findDocumentFile,
   findDocumentsByUser,
   findUserByEmail,
   insertDocument,
   insertDocumentMember,
+  insertFileDocument,
   isDocumentOwner,
   removeDocument,
+  replaceDocumentFile,
   updateDocumentContent,
 } from '../repositories/documentRepository.js';
+
+// Un document fichier arrive en base64 dans du JSON (pas de multer, plus simple).
+function decodeFilePayload(body) {
+  const fileName = body.fileName?.trim();
+  const fileMime = body.fileMime?.trim();
+  const fileBase64 = body.fileBase64;
+
+  if (!fileName || !fileMime || typeof fileBase64 !== 'string' || !fileBase64) {
+    return null;
+  }
+
+  return { fileName, fileMime, buffer: Buffer.from(fileBase64, 'base64') };
+}
 
 export async function getDocumentAccess(req, res, next) {
   try {
@@ -54,12 +70,101 @@ export async function createDocument(req, res, next) {
         id: documentId,
         title,
         content: '',
+        type: 'text',
         ownerId: req.user.id,
         access: 'owner',
         lastModifiedBy: 'Vous',
         updatedAt: new Date(),
       },
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function uploadDocument(req, res, next) {
+  try {
+    const file = decodeFilePayload(req.body);
+
+    if (!file) {
+      return res.status(400).json({ message: 'Fichier invalide' });
+    }
+
+    const title = req.body.title?.trim() || file.fileName;
+    const documentId = await insertFileDocument(
+      req.user.id,
+      title,
+      file.fileName,
+      file.fileMime,
+      file.buffer,
+    );
+
+    res.status(201).json({
+      document: {
+        id: documentId,
+        title,
+        content: '',
+        type: 'file',
+        fileName: file.fileName,
+        fileMime: file.fileMime,
+        ownerId: req.user.id,
+        access: 'owner',
+        lastModifiedBy: 'Vous',
+        updatedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function replaceFile(req, res, next) {
+  try {
+    const file = decodeFilePayload(req.body);
+
+    if (!file) {
+      return res.status(400).json({ message: 'Fichier invalide' });
+    }
+
+    const affectedRows = await replaceDocumentFile(
+      req.params.documentId,
+      req.user.id,
+      file.fileName,
+      file.fileMime,
+      file.buffer,
+    );
+
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: 'Document introuvable ou modification interdite' });
+    }
+
+    res.json({
+      document: {
+        fileName: file.fileName,
+        fileMime: file.fileMime,
+        updatedAt: new Date(),
+        lastModifiedBy: 'Vous',
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function downloadFile(req, res, next) {
+  try {
+    const file = await findDocumentFile(req.params.documentId, req.user.id);
+
+    if (!file || !file.fileData) {
+      return res.status(404).json({ message: 'Fichier introuvable' });
+    }
+
+    res.setHeader('Content-Type', file.fileMime || 'application/octet-stream');
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="${encodeURIComponent(file.fileName || 'fichier')}"`,
+    );
+    res.send(file.fileData);
   } catch (error) {
     next(error);
   }

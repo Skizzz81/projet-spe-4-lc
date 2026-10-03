@@ -11,7 +11,7 @@ const app = express();
 const port = Number(process.env.PORT ?? 3000);
 const frontendUrl = (process.env.FRONTEND_URL ?? 'http://localhost:5173').replace(/\/+$/, '');
 
-app.use(express.json());
+app.use(express.json({ limit: '30mb' }));
 app.use(cookieParser());
 app.use(
   cors({
